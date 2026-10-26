@@ -1,14 +1,11 @@
-
 import { Link } from "react-router-dom";
 import { Heart, Target, Users, ShieldCheck } from "lucide-react";
-
 const values = [
   { icon: Heart, title: "Customer First", text: "We design our shopping experience around customer needs." },
   { icon: ShieldCheck, title: "Trust & Clarity", text: "We aim to make product details and policies easy to understand." },
   { icon: Target, title: "Quality Focus", text: "We want to help shoppers discover useful, thoughtfully selected products." },
   { icon: Users, title: "Better Experience", text: "We continuously look for ways to make browsing easier." },
 ];
-
 export default function About() {
   return (
     <main>
@@ -46,7 +43,6 @@ export default function About() {
           </Link>
         </div>
       </section>
-
       <section className="bg-gray-50 px-6 py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 text-center">
@@ -64,7 +60,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       <section className="px-6 py-16 text-center">
         <h2 className="text-3xl font-bold text-gray-950">Have a question?</h2>
         <p className="mt-3 text-gray-600">We'd be happy to hear from you.</p>

@@ -1,4 +1,3 @@
-
 const products = [
   {
     id: 1,
@@ -19,5 +18,4 @@ const products = [
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600",
   },
 ];
-
 export default products;
