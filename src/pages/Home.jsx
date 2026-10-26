@@ -6,6 +6,7 @@ import {
   Shirt, Watch, ShoppingBag
 } from "lucide-react";
 import ProductList from "../components/ProductList";
+import herosub from "../assets/herosub.jpg";
 
 const categories = [
   { name: "Fashion", icon: Shirt, color: "bg-pink-100 text-pink-600" },
@@ -45,15 +46,14 @@ export default function Home({
 
   return (
     <main>
-      {/* Hero */}
-      <section className="overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-100">
+      <section className="relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85')] bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-white/15">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
           <div>
             <span className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">
               Welcome to DigiMart
             </span>
-            <h1 className="mt-6 text-4xl font-extrabold leading-tight text-gray-950 sm:text-5xl lg:text-6xl">
-              Discover products you'll{" "}
+            <h1 className="mt-6 text-4xl font-extrabold leading-tight text-black-1000 sm:text-5xl lg:text-6xl ">
+              Discover products you'll
               <span className="text-indigo-600">love.</span>
             </h1>
             <p className="mt-5 max-w-lg leading-7 text-gray-600">
@@ -83,7 +83,7 @@ export default function Home({
 
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85"
+              src={herosub}
               alt="Modern retail store"
               className="h-80 w-full rounded-3xl object-cover shadow-xl md:h-[440px]"
             />
@@ -95,7 +95,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Categories */}
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
