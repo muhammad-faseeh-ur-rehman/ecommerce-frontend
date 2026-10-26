@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Search, ShoppingCart, Menu, X } from "lucide-react";
-
 export default function Navbar({
   search,
   setSearch,
@@ -17,14 +15,12 @@ export default function Navbar({
     { name: "Contact Us", path: "/contact" },
     { name: "FAQs", path: "/faqs" },
   ];
-
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
         <Link to="/" className="text-2xl font-extrabold text-indigo-600">
           DigiMart<span className="text-gray-900">.</span>
         </Link>
-
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((link) => (
             <NavLink
@@ -42,7 +38,6 @@ export default function Navbar({
             </NavLink>
           ))}
         </nav>
-
         <div className="flex items-center gap-3">
           <div className="hidden items-center rounded-full bg-gray-100 px-3 py-2 sm:flex">
             <Search size={18} className="text-gray-500" />
@@ -54,7 +49,6 @@ export default function Navbar({
               className="w-32 bg-transparent px-2 text-sm outline-none md:w-44"
             />
           </div>
-
           <button
             onClick={onOpenCart}
             aria-label="Open shopping cart"
@@ -65,7 +59,6 @@ export default function Navbar({
               {cartCount}
             </span>
           </button>
-
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -75,7 +68,6 @@ export default function Navbar({
           </button>
         </div>
       </div>
-
       {menuOpen && (
         <nav className="border-t bg-white p-4 md:hidden">
           {links.map((link) => (
