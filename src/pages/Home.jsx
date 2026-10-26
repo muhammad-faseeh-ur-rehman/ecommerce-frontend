@@ -132,7 +132,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Promotional banner */}
       <section className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gray-950 p-8 text-white sm:p-12 md:flex-row md:items-center">
           <div>
@@ -150,7 +149,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Existing products */}
       <section id="products" className="scroll-mt-24">
         <ProductList
           products={products}
@@ -160,7 +158,6 @@ export default function Home({
         />
       </section>
 
-      {/* Store benefits */}
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -181,7 +178,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Customer feedback sample */}
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 text-center">
           <p className="font-semibold text-indigo-600">Customer feedback</p>
@@ -205,7 +201,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Newsletter */}
       <section className="bg-indigo-600 px-6 py-16 text-white">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold">Stay in the loop</h2>
