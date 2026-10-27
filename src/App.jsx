@@ -6,6 +6,7 @@ import {
   Route,
   useLocation,
   Link,
+  Navigate,
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -16,6 +17,12 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQs from "./pages/FAQs";
+
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Choose from "./pages/Choose";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./ProtectedRoute";
 
 import productsData from "./data/products";
 
@@ -35,7 +42,6 @@ function StoreLayout() {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Search and category filtering
   const filteredProducts = useMemo(() => {
     return productsData.filter((product) => {
       const matchesSearch = product.name
@@ -49,13 +55,11 @@ function StoreLayout() {
     });
   }, [search, category]);
 
-  // Total number of items in the cart
   const cartCount = cart.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
-  // Add a product to the cart
   function handleAddToCart(product) {
     setCart((currentCart) => {
       const existingItem = currentCart.find(
@@ -76,7 +80,6 @@ function StoreLayout() {
     setIsCartOpen(true);
   }
 
-  // Increase or decrease product quantity
   function handleChangeQuantity(id, amount) {
     setCart((currentCart) =>
       currentCart
@@ -89,7 +92,6 @@ function StoreLayout() {
     );
   }
 
-  // Remove a product from the cart
   function handleRemoveFromCart(id) {
     setCart((currentCart) =>
       currentCart.filter((item) => item.id !== id)
@@ -108,9 +110,8 @@ function StoreLayout() {
       />
 
       <Routes>
-        {/* Home page */}
         <Route
-          path="/"
+          index
           element={
             <Home
               products={filteredProducts}
@@ -121,16 +122,10 @@ function StoreLayout() {
           }
         />
 
-        {/* About Us page */}
-        <Route path="/about" element={<About />} />
+        <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="faqs" element={<FAQs />} />
 
-        {/* Contact Us page */}
-        <Route path="/contact" element={<Contact />} />
-
-        {/* Frequently Asked Questions page */}
-        <Route path="/faqs" element={<FAQs />} />
-
-        {/* 404 page */}
         <Route
           path="*"
           element={
@@ -148,10 +143,10 @@ function StoreLayout() {
               </p>
 
               <Link
-                to="/"
+                to="/store"
                 className="mt-6 rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white transition hover:bg-indigo-700"
               >
-                Return to Home
+                Return to Store
               </Link>
             </main>
           }
@@ -160,7 +155,6 @@ function StoreLayout() {
 
       <Footer />
 
-      {/* Shopping cart drawer */}
       <Cart
         cart={cart}
         isOpen={isCartOpen}
@@ -175,7 +169,24 @@ function StoreLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <StoreLayout />
+      <Routes>
+        {/* Show login first */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Require authentication for these pages */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/choose" element={<Choose />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* Existing store pages */}
+          <Route path="/store/*" element={<StoreLayout />} />
+        </Route>
+
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

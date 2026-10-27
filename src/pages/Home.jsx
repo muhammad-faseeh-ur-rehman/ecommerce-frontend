@@ -46,38 +46,36 @@ export default function Home({
 
   return (
     <main>
-      <section className="relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85')] bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-white/15">
+      <section className="relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85')] bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-white/5">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
           <div>
             <span className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">
               Welcome to DigiMart
             </span>
-            <h1 className="mt-6 text-4xl font-extrabold leading-tight text-black-1000 sm:text-5xl lg:text-6xl ">
-              Discover products you'll
-              <span className="text-indigo-600">love.</span>
+            <h1 className="mt-6 text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl ">
+              Discover products you'll 
+              <span className="text-indigo-600"> love.</span>
             </h1>
-            <p className="mt-5 max-w-lg leading-7 text-gray-600">
+            <p className="mt-5 max-w-lg leading-7 text-white">
               Explore fashion, electronics and everyday accessories in one
               place. Find something that fits your style and your needs.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <a
-                href="#products"
-                className="rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white transition hover:bg-indigo-700"
+              <button
+                className=" cursor-pointer rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white transition hover:bg-indigo-700 "
               >
                 Shop Products <ArrowRight className="ml-2 inline" size={18} />
-              </a>
-              <Link
-                to="/about"
+              </button>
+              <button
                 className="rounded-full border border-gray-300 bg-white px-7 py-3 font-semibold text-gray-800 hover:bg-gray-50"
               >
                 Our Story
-              </Link>
+              </button>
             </div>
-            <div className="mt-8 flex flex-wrap gap-5 text-sm text-gray-600">
-              <span>✓ Curated products</span>
-              <span>✓ Easy browsing</span>
-              <span>✓ Customer-focused</span>
+            <div className="mt-8 flex flex-wrap gap-5 text-sm text-white">
+              <span> Curated products</span>
+              <span> Easy browsing</span>
+              <span> Customer-focused</span>
             </div>
           </div>
 

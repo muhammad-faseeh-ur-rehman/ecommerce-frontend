@@ -8,7 +8,6 @@ export default function Cart({
   onRemove,
 }) {
   if (!isOpen) return null;
-
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
