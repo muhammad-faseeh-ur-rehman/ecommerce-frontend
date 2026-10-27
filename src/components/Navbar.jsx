@@ -56,15 +56,12 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-        {/* Logo */}
         <Link
           to="/"
           className="shrink-0 text-2xl font-extrabold text-indigo-600"
         >
           DigiMart<span className="text-gray-900">.</span>
         </Link>
-
-        {/* Desktop navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((link) => (
             <NavLink
@@ -76,8 +73,6 @@ export default function Navbar({
             </NavLink>
           ))}
         </nav>
-
-        {/* Search, cart and account */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden items-center rounded-full bg-gray-100 px-3 py-2 sm:flex">
             <Search size={18} className="shrink-0 text-gray-500" />
@@ -100,8 +95,6 @@ export default function Navbar({
               {cartCount}
             </span>
           </button>
-
-          {/* Desktop account menu */}
           {token ? (
             <div className="relative hidden md:block">
               <button
@@ -152,7 +145,6 @@ export default function Navbar({
             </div>
           )}
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -163,8 +155,6 @@ export default function Navbar({
           </button>
         </div>
       </div>
-
-      {/* Mobile navigation */}
       {menuOpen && (
         <nav className="border-t bg-white p-4 md:hidden">
           {links.map((link) => (
