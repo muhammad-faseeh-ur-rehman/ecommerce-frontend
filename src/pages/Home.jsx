@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -7,26 +6,22 @@ import {
 } from "lucide-react";
 import ProductList from "../components/ProductList";
 import herosub from "../assets/herosub.jpg";
-
 const categories = [
   { name: "Fashion", icon: Shirt, color: "bg-pink-100 text-pink-600" },
   { name: "Electronics", icon: Watch, color: "bg-blue-100 text-blue-600" },
   { name: "Accessories", icon: ShoppingBag, color: "bg-amber-100 text-amber-600" },
 ];
-
 const benefits = [
   { icon: Truck, title: "Fast Delivery", text: "Convenient delivery for your orders." },
   { icon: ShieldCheck, title: "Secure Shopping", text: "Shop with confidence and care." },
   { icon: RefreshCw, title: "Easy Returns", text: "Clear and simple return policies." },
   { icon: Headphones, title: "Customer Support", text: "We're here to help with questions." },
 ];
-
 const reviews = [
   { name: "Ayesha K.", text: "A clean and easy shopping experience.", rating: 5 },
   { name: "Ali R.", text: "Good selection and a simple checkout layout.", rating: 5 },
   { name: "Sara M.", text: "I like how easy it is to browse categories.", rating: 4 },
 ];
-
 export default function Home({
   products,
   onAddToCart,
@@ -35,7 +30,6 @@ export default function Home({
 }) {
   const [email, setEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
-
   function handleNewsletter(e) {
     e.preventDefault();
     setNewsletterMessage(
@@ -43,7 +37,6 @@ export default function Home({
     );
     setEmail("");
   }
-
   return (
     <main>
       <section className="relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85')] bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-white/5">
@@ -92,7 +85,6 @@ export default function Home({
           </div>
         </div>
       </section>
-
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
@@ -103,7 +95,6 @@ export default function Home({
             View products →
           </a>
         </div>
-
         <div className="grid gap-5 sm:grid-cols-3">
           {categories.map(({ name, icon: Icon, color }) => (
             <button
@@ -128,7 +119,6 @@ export default function Home({
           ))}
         </div>
       </section>
-
       <section className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gray-950 p-8 text-white sm:p-12 md:flex-row md:items-center">
           <div>
@@ -145,7 +135,6 @@ export default function Home({
           </a>
         </div>
       </section>
-
       <section id="products" className="scroll-mt-24">
         <ProductList
           products={products}
@@ -154,7 +143,6 @@ export default function Home({
           setCategory={setCategory}
         />
       </section>
-
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -174,7 +162,6 @@ export default function Home({
           </div>
         </div>
       </section>
-
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 text-center">
           <p className="font-semibold text-indigo-600">Customer feedback</p>
@@ -197,7 +184,6 @@ export default function Home({
           ))}
         </div>
       </section>
-
       <section className="bg-indigo-600 px-6 py-16 text-white">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold">Stay in the loop</h2>
