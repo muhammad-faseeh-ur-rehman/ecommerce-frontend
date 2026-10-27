@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const questions = [
   {
     question: "How do I place an order?",
@@ -29,10 +27,8 @@ const questions = [
     answer: "Order changes and cancellations are not implemented yet. You can add this feature with order management on the backend.",
   },
 ];
-
 export default function FAQs() {
   const [openIndex, setOpenIndex] = useState(0);
-
   return (
     <main>
       <section className="bg-gradient-to-br from-indigo-50 to-white px-6 py-16 text-center">
@@ -44,12 +40,10 @@ export default function FAQs() {
           Find answers to common questions about shopping with DigiMart.
         </p>
       </section>
-
       <section className="mx-auto max-w-3xl px-6 py-14">
         <div className="space-y-4">
           {questions.map((item, index) => {
             const isOpen = openIndex === index;
-
             return (
               <article key={item.question} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 <button
@@ -64,7 +58,6 @@ export default function FAQs() {
                     className={`shrink-0 transition-transform ${isOpen ? "rotate-180 text-indigo-600" : ""}`}
                   />
                 </button>
-
                 {isOpen && (
                   <div className="border-t border-gray-100 px-5 py-4 leading-7 text-gray-600">
                     {item.answer}
@@ -74,7 +67,6 @@ export default function FAQs() {
             );
           })}
         </div>
-
         <div className="mt-10 rounded-2xl bg-indigo-50 p-7 text-center">
           <h2 className="text-xl font-bold text-gray-950">Still need help?</h2>
           <p className="mt-2 text-gray-600">Send us your question through our contact page.</p>
