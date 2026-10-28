@@ -1,96 +1,91 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  async function handleSubmit(e) {
+  function handleLogin(e) {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
-    try {
-      const { data } = await api.post("/auth/admin-login", form);
-
-      if (data.user?.role !== "admin") {
-        throw new Error("This account is not authorized as an admin.");
-      }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    if (
+      email.trim().toLowerCase() === "admin@digimart.com" &&
+      password === "DigiMart@123"
+    ) {
+      localStorage.setItem("token", "demo-admin-session");
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: "DigiMart Admin",
+          email: "admin@digimart.com",
+          role: "admin",
+        })
+      );
 
       navigate("/dashboard", { replace: true });
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Admin login failed."
-      );
-    } finally {
-      setLoading(false);
+    } else {
+      setError("Invalid admin email or password.");
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-center text-3xl font-bold">Admin Login</h1>
-        <p className="mt-2 text-center text-gray-500">
-          Sign in to manage your store
-        </p>
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+      <form
+        onSubmit={handleLogin}
+        className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl"
+      >
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-extrabold text-slate-900">
+            Digi<span className="text-indigo-600">Mart</span>
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Administrator Portal
+          </p>
+        </div>
+
+        <label className="mb-2 block text-sm font-semibold">
+          Admin Email
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="admin@digimart.com"
+          required
+          className="mb-5 w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-indigo-500"
+        />
+
+        <label className="mb-2 block text-sm font-semibold">
+          Password
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter admin password"
+          required
+          className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-indigo-500"
+        />
 
         {error && (
-          <p className="mt-5 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </p>
+          <p className="mt-3 text-sm text-red-600">{error}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <input
-            name="email"
-            type="email"
-            placeholder="Admin email"
-            value={form.email}
-            onChange={handleChange}
-            autoComplete="username"
-            required
-            className="w-full rounded-lg border px-4 py-3"
-          />
+        <button
+          type="submit"
+          className="mt-6 w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700"
+        >
+          Sign In to Dashboard
+        </button>
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            autoComplete="current-password"
-            required
-            className="w-full rounded-lg border px-4 py-3"
-          />
-
-          <button
-            disabled={loading}
-            className="w-full rounded-lg bg-gray-900 py-3 font-semibold text-white disabled:opacity-60"
-          >
-            {loading ? "Verifying..." : "Admin Sign In"}
-          </button>
-        </form>
-
-        <p className="mt-5 text-center text-sm">
-          <Link to="/login" className="text-indigo-600 hover:underline">
-            Back to customer login
-          </Link>
+        <p className="mt-5 text-center text-xs text-slate-400">
+          Local demonstration mode
         </p>
-      </div>
-    </main>
+      </form>
+    </div>
   );
 }
