@@ -106,7 +106,6 @@ export default function Navbar({
                   {user?.name || "My Account"}
                 </span>
               </button>
-
               {accountOpen && (
                 <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
                   <Link
@@ -144,7 +143,6 @@ export default function Navbar({
               </Link>
             </div>
           )}
-
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -167,7 +165,6 @@ export default function Navbar({
               {link.name}
             </NavLink>
           ))}
-
           <div className="mt-3 flex items-center rounded-lg border px-3 py-2">
             <Search size={18} className="shrink-0 text-gray-500" />
             <input
@@ -178,7 +175,6 @@ export default function Navbar({
               className="w-full px-2 py-1 outline-none"
             />
           </div>
-
           {token ? (
             <div className="mt-3 space-y-2 border-t pt-3">
               <p className="px-3 text-sm text-gray-500">
