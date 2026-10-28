@@ -20,7 +20,7 @@ import FAQs from "./pages/FAQs";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Choose from "./pages/Choose";
+import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -133,18 +133,15 @@ function StoreLayout() {
               <h1 className="text-6xl font-extrabold text-indigo-600">
                 404
               </h1>
-
               <h2 className="mt-4 text-2xl font-bold text-gray-900">
                 Page Not Found
               </h2>
-
               <p className="mt-3 text-gray-600">
-                Sorry, the page you are looking for does not exist.
+                Sorry, this page does not exist.
               </p>
-
               <Link
                 to="/store"
-                className="mt-6 rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white transition hover:bg-indigo-700"
+                className="mt-6 rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white"
               >
                 Return to Store
               </Link>
@@ -170,22 +167,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Show login first */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Require authentication for these pages */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/choose" element={<Choose />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {/* Existing store pages */}
           <Route path="/store/*" element={<StoreLayout />} />
         </Route>
 
-        {/* Redirect unknown routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<ProtectedRoute adminOnly />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
