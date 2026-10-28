@@ -184,7 +184,6 @@ export default function Navbar({
               <p className="px-3 text-sm text-gray-500">
                 Signed in as {user?.name || user?.email || "Customer"}
               </p>
-
               <Link
                 to="/dashboard"
                 onClick={() => setMenuOpen(false)}
@@ -193,7 +192,6 @@ export default function Navbar({
                 <LayoutDashboard size={19} />
                 My Dashboard
               </Link>
-
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left font-medium text-red-600 hover:bg-red-50"
