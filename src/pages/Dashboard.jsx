@@ -139,19 +139,15 @@ export default function Dashboard() {
     setEditingProduct(null);
     setForm(emptyForm);
   }
-
   function deleteProduct(productId) {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product from the current dashboard session?"
     );
-
     if (!confirmed) return;
-
     setProducts((previous) =>
       previous.filter((product) => product.id !== productId)
     );
   }
-
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
