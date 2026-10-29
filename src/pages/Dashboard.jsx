@@ -76,7 +76,6 @@ export default function Dashboard() {
     setForm(emptyForm);
     setShowModal(true);
   }
-
   function openEditProduct(product) {
     setEditingProduct(product);
     setForm({
