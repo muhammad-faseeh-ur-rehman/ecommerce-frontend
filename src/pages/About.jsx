@@ -19,7 +19,6 @@ export default function About() {
           everyday products through a clean, convenient shopping experience.
         </p>
       </section>
-
       <section className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2">
         <img
           src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1000&q=85"
