@@ -321,7 +321,6 @@ export default function Dashboard() {
                   No sales data available yet
                 </div>
               </div>
-
               <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h3 className="font-semibold">Quick Actions</h3>
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -336,7 +335,6 @@ export default function Dashboard() {
                     <Plus size={18} />
                     Add Product
                   </button>
-
                   <button
                     type="button"
                     onClick={() => changePage("Products")}
@@ -345,7 +343,6 @@ export default function Dashboard() {
                     <Package size={18} />
                     Manage Products
                   </button>
-
                   <button
                     type="button"
                     onClick={() => changePage("Orders")}
@@ -358,7 +355,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-
           {activePage === "Products" && (
             <div className="space-y-6">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -368,7 +364,6 @@ export default function Dashboard() {
                     Manage the products shown in your current dashboard session.
                   </p>
                 </div>
-
                 <button
                   type="button"
                   onClick={openAddProduct}
@@ -378,7 +373,6 @@ export default function Dashboard() {
                   Add Product
                 </button>
               </div>
-
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
                 <Search size={20} className="text-gray-400" />
                 <input
@@ -389,7 +383,6 @@ export default function Dashboard() {
                   className="w-full bg-transparent outline-none"
                 />
               </div>
-
               <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px] text-left text-sm">
@@ -403,7 +396,6 @@ export default function Dashboard() {
                         <th className="px-5 py-4 font-semibold">Actions</th>
                       </tr>
                     </thead>
-
                     <tbody className="divide-y divide-gray-100">
                       {filteredProducts.map((product) => (
                         <tr key={product.id} className="hover:bg-gray-50">
