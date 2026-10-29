@@ -455,7 +455,6 @@ export default function Dashboard() {
                           </td>
                         </tr>
                       ))}
-
                       {filteredProducts.length === 0 && (
                         <tr>
                           <td
@@ -470,14 +469,12 @@ export default function Dashboard() {
                   </table>
                 </div>
               </div>
-
               <p className="text-sm text-gray-500">
                 Showing {filteredProducts.length} of {products.length} products.
                 Changes are temporary and will reset when you refresh.
               </p>
             </div>
           )}
-
           {activePage === "Orders" && (
             <div className="space-y-6">
               <div>
@@ -492,7 +489,6 @@ export default function Dashboard() {
               />
             </div>
           )}
-
           {activePage === "Customers" && (
             <div className="space-y-6">
               <div>
@@ -509,7 +505,6 @@ export default function Dashboard() {
           )}
         </div>
       </main>
-
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
           <div className="my-auto w-full max-w-lg rounded-2xl bg-white shadow-2xl">
@@ -531,7 +526,6 @@ export default function Dashboard() {
                 <X size={20} />
               </button>
             </div>
-
             <form onSubmit={saveProduct} className="space-y-4 p-6">
               <div>
                 <label className="mb-1 block text-sm font-medium">
@@ -546,7 +540,6 @@ export default function Dashboard() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
                 />
               </div>
-
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Category
@@ -564,7 +557,6 @@ export default function Dashboard() {
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium">
@@ -580,7 +572,6 @@ export default function Dashboard() {
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
                   />
                 </div>
-
                 <div>
                   <label className="mb-1 block text-sm font-medium">
                     Stock Quantity
