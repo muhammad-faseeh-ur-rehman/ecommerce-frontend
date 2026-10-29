@@ -17,14 +17,10 @@ import {
   TrendingUp,
   IndianRupee,
 } from "lucide-react";
-
 import productsData from "../data/products";
-
 const categories = ["Fashion", "Electronics", "Accessories"];
-
 const money = (amount) =>
   `Rs. ${Number(amount || 0).toLocaleString("en-PK")}`;
-
 function EmptyState({ title, message }) {
   return (
     <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
@@ -36,7 +32,6 @@ function EmptyState({ title, message }) {
     </div>
   );
 }
-
 export default function Dashboard() {
   const navigate = useNavigate();
 
