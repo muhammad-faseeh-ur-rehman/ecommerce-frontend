@@ -230,7 +230,6 @@ export default function Dashboard() {
           </button>
         </div>
       </aside>
-
       <main className="min-h-screen lg:ml-64">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 sm:px-8">
           <div className="flex items-center gap-3">
@@ -242,7 +241,6 @@ export default function Dashboard() {
             >
               <Menu size={22} />
             </button>
-
             <div>
               <h2 className="text-xl font-bold sm:text-2xl">
                 {activePage}
@@ -258,7 +256,6 @@ export default function Dashboard() {
             Admin session
           </div>
         </header>
-
         <div className="p-4 sm:p-8">
           {activePage === "Overview" && (
             <div className="space-y-6">
@@ -289,7 +286,6 @@ export default function Dashboard() {
                   },
                 ].map((card) => {
                   const Icon = card.icon;
-
                   return (
                     <div
                       key={card.title}
@@ -310,7 +306,6 @@ export default function Dashboard() {
                   );
                 })}
               </div>
-
               <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3">
                   <TrendingUp className="text-indigo-600" size={24} />
