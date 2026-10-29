@@ -47,7 +47,6 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const emptyForm = {
     name: "",
     category: "Fashion",
@@ -56,19 +55,15 @@ export default function Dashboard() {
     stock: "10",
     image: "",
   };
-
   const [form, setForm] = useState(emptyForm);
-
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
-
     return products.filter(
       (product) =>
         product.name.toLowerCase().includes(term) ||
         product.category.toLowerCase().includes(term)
     );
   }, [products, search]);
-
   const navigation = [
     { name: "Overview", icon: LayoutDashboard },
     { name: "Products", icon: Package },
