@@ -88,15 +88,12 @@ export default function Dashboard() {
     });
     setShowModal(true);
   }
-
   function handleFormChange(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
   }
-
   function saveProduct(event) {
     event.preventDefault();
-
     const productDetails = {
       name: form.name.trim(),
       category: form.category,
@@ -105,7 +102,6 @@ export default function Dashboard() {
       stock: Number(form.stock),
       image: form.image.trim(),
     };
-
     if (
       !productDetails.name ||
       !productDetails.image ||
