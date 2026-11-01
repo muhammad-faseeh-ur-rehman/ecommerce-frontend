@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ adminOnly = false }) {
   const location = useLocation();
+
   const token = localStorage.getItem("token");
 
   let user = null;
@@ -13,22 +14,28 @@ export default function ProtectedRoute({ adminOnly = false }) {
     user = null;
   }
 
+  // Protect admin dashboard
+  if (adminOnly) {
+    if (!token || !user) {
+      return (
+        <Navigate
+          to="/admin-login"
+          replace
+          state={{ from: location }}
+        />
+      );
+    }
+
+    if (user.role !== "admin") {
+      return <Navigate to="/admin-login" replace />;
+    }
+
+    return <Outlet />;
+  }
+
+  // Protect normal customer routes if needed
   if (!token || !user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: location }}
-      />
-    );
-  }
-
-  if (adminOnly && user.role !== "admin") {
-    return <Navigate to="/store" replace />;
-  }
-
-  if (!adminOnly && user.role === "admin") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

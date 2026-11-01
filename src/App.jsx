@@ -22,8 +22,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./ProtectedRoute";
 
+import ProtectedRoute from "./ProtectedRoute";
 import productsData from "./data/products";
 
 function ScrollToTop() {
@@ -39,8 +39,21 @@ function ScrollToTop() {
 function StoreLayout() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  const [cart, setCart] = useState([]);
+
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Save cart in localStorage
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
   const filteredProducts = useMemo(() => {
     return productsData.filter((product) => {
@@ -133,12 +146,15 @@ function StoreLayout() {
               <h1 className="text-6xl font-extrabold text-indigo-600">
                 404
               </h1>
+
               <h2 className="mt-4 text-2xl font-bold text-gray-900">
                 Page Not Found
               </h2>
+
               <p className="mt-3 text-gray-600">
                 Sorry, this page does not exist.
               </p>
+
               <Link
                 to="/store"
                 className="mt-6 rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white"
@@ -167,21 +183,24 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Public website */}
+        <Route path="/" element={<Navigate to="/store" replace />} />
 
+        <Route path="/store/*" element={<StoreLayout />} />
+
+        {/* Customer authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        {/* Admin authentication */}
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/store/*" element={<StoreLayout />} />
-        </Route>
-
+        {/* Admin protected dashboard */}
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/store" replace />} />
       </Routes>
     </BrowserRouter>
   );
