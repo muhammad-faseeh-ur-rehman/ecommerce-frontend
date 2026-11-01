@@ -24,7 +24,7 @@ import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 
-import productsData from "./data/products";
+import api from "./api";
 
 const CART_KEY = "digimart_cart";
 
@@ -62,16 +62,68 @@ function StoreLayout() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState("");
+  const [reloadProducts, setReloadProducts] = useState(0);
+
   const [cart, setCart] = useState(getSavedCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Fetch products from MongoDB through the backend API
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchProducts() {
+      try {
+        setProductsLoading(true);
+        setProductsError("");
+
+        const { data } = await api.get("/products");
+
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid products response from server.");
+        }
+
+        if (isMounted) {
+          // Use MongoDB _id as the cart's product ID
+          const formattedProducts = data.map((product) => ({
+            ...product,
+            id: product._id,
+          }));
+
+          setProducts(formattedProducts);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setProductsError(
+            error.response?.data?.message ||
+              error.message ||
+              "Unable to load products. Please try again."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setProductsLoading(false);
+        }
+      }
+    }
+
+    fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [reloadProducts]);
 
   // Save cart in browser storage
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
+  // Search and category filtering
   const filteredProducts = useMemo(() => {
-    return productsData.filter((product) => {
+    return products.filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
         .includes(search.toLowerCase());
@@ -81,7 +133,7 @@ function StoreLayout() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [search, category]);
+  }, [products, search, category]);
 
   const cartCount = cart.reduce(
     (total, item) => total + item.quantity,
@@ -91,12 +143,12 @@ function StoreLayout() {
   function handleAddToCart(product) {
     setCart((currentCart) => {
       const existingItem = currentCart.find(
-        (item) => item.id === product.id
+        (item) => String(item.id) === String(product.id)
       );
 
       if (existingItem) {
         return currentCart.map((item) =>
-          item.id === product.id
+          String(item.id) === String(product.id)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -112,7 +164,7 @@ function StoreLayout() {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
-          item.id === id
+          String(item.id) === String(id)
             ? {
                 ...item,
                 quantity: item.quantity + amount,
@@ -125,7 +177,9 @@ function StoreLayout() {
 
   function handleRemoveFromCart(id) {
     setCart((currentCart) =>
-      currentCart.filter((item) => item.id !== id)
+      currentCart.filter(
+        (item) => String(item.id) !== String(id)
+      )
     );
   }
 
@@ -154,6 +208,11 @@ function StoreLayout() {
               onAddToCart={handleAddToCart}
               category={category}
               setCategory={setCategory}
+              productsLoading={productsLoading}
+              productsError={productsError}
+              onRetryProducts={() =>
+                setReloadProducts((previous) => previous + 1)
+              }
             />
           }
         />
@@ -162,7 +221,6 @@ function StoreLayout() {
         <Route path="contact" element={<Contact />} />
         <Route path="faqs" element={<FAQs />} />
 
-        {/* Customer Checkout */}
         <Route
           path="checkout"
           element={
@@ -226,10 +284,10 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Public store: guests can browse and shop */}
+        {/* Public store */}
         <Route path="/store/*" element={<StoreLayout />} />
 
-        {/* Protected admin dashboard */}
+        {/* Admin dashboard */}
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>

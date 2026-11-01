@@ -1,10 +1,12 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const destination = location.state?.from || "/store";
 
   const [form, setForm] = useState({
     name: "",
@@ -16,33 +18,27 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-
     setError("");
     setLoading(true);
 
     try {
       await api.post("/auth/register", form);
 
-      // Registration successful
       navigate("/login", {
         replace: true,
         state: {
-          message: "Account created successfully! Please log in to continue shopping.",
+          message: "Account created successfully! Please log in.",
+          from: destination,
         },
       });
-
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-        "Signup failed. Please try again."
+        err.response?.data?.message || "Signup failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -51,9 +47,7 @@ export default function Signup() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-10">
-
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-
         <Link
           to="/store"
           className="mb-6 block text-center text-2xl font-extrabold text-indigo-600"
@@ -61,10 +55,7 @@ export default function Signup() {
           DigiMart.
         </Link>
 
-        <h1 className="text-center text-3xl font-bold">
-          Create Account
-        </h1>
-
+        <h1 className="text-center text-3xl font-bold">Create Account</h1>
         <p className="mt-2 text-center text-gray-500">
           Join DigiMart and start shopping
         </p>
@@ -76,12 +67,8 @@ export default function Signup() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Full Name
-            </label>
-
+            <label className="mb-1 block text-sm font-medium">Full Name</label>
             <input
               name="name"
               value={form.name}
@@ -94,10 +81,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Email
-            </label>
-
+            <label className="mb-1 block text-sm font-medium">Email</label>
             <input
               name="email"
               type="email"
@@ -111,10 +95,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Password
-            </label>
-
+            <label className="mb-1 block text-sm font-medium">Password</label>
             <input
               name="password"
               type="password"
@@ -126,7 +107,6 @@ export default function Signup() {
               required
               className="w-full rounded-lg border px-4 py-3 outline-none focus:border-indigo-600"
             />
-
             <p className="mt-1 text-xs text-gray-400">
               Password must contain at least 8 characters.
             </p>
@@ -139,13 +119,13 @@ export default function Signup() {
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
-
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-600">
           Already have an account?{" "}
           <Link
             to="/login"
+            state={{ from: destination }}
             className="font-semibold text-indigo-600"
           >
             Log In
@@ -153,14 +133,10 @@ export default function Signup() {
         </p>
 
         <p className="mt-4 text-center text-sm">
-          <Link
-            to="/store"
-            className="text-gray-500 hover:text-indigo-600"
-          >
+          <Link to="/store" className="text-gray-500 hover:text-indigo-600">
             Continue Shopping
           </Link>
         </p>
-
       </div>
     </main>
   );
