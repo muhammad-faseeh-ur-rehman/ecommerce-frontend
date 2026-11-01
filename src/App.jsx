@@ -22,9 +22,20 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
-
 import ProtectedRoute from "./ProtectedRoute";
+
 import productsData from "./data/products";
+
+const CART_KEY = "digimart_cart";
+
+function getSavedCart() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -40,19 +51,12 @@ function StoreLayout() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  const [cart, setCart] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("cart") || "[]");
-    } catch {
-      return [];
-    }
-  });
-
+  const [cart, setCart] = useState(getSavedCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Save cart in localStorage
+  // Persist cart
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
   const filteredProducts = useMemo(() => {
@@ -98,7 +102,10 @@ function StoreLayout() {
       currentCart
         .map((item) =>
           item.id === id
-            ? { ...item, quantity: item.quantity + amount }
+            ? {
+                ...item,
+                quantity: item.quantity + amount,
+              }
             : item
         )
         .filter((item) => item.quantity > 0)
@@ -147,7 +154,7 @@ function StoreLayout() {
                 404
               </h1>
 
-              <h2 className="mt-4 text-2xl font-bold text-gray-900">
+              <h2 className="mt-4 text-2xl font-bold">
                 Page Not Found
               </h2>
 
@@ -183,20 +190,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public website */}
         <Route path="/" element={<Navigate to="/store" replace />} />
 
-        <Route path="/store/*" element={<StoreLayout />} />
-
-        {/* Customer authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
-        {/* Admin authentication */}
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Admin protected dashboard */}
-        <Route element={<ProtectedRoute adminOnly />}>
+        <Route
+          element={<ProtectedRoute />}
+        >
+          <Route path="/store/*" element={<StoreLayout />} />
+        </Route>
+
+        <Route
+          element={<ProtectedRoute adminOnly />}
+        >
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
