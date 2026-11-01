@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+
 import {
   Search,
   ShoppingCart,
@@ -19,6 +20,7 @@ export default function Navbar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -32,18 +34,21 @@ export default function Navbar({
   }
 
   const links = [
-  { name: "Home", path: "/store" },
-  { name: "About Us", path: "/store/about" },
-  { name: "Contact Us", path: "/store/contact" },
-  { name: "FAQs", path: "/store/faqs" },
-];
+    { name: "Home", path: "/store" },
+    { name: "About Us", path: "/store/about" },
+    { name: "Contact Us", path: "/store/contact" },
+    { name: "FAQs", path: "/store/faqs" },
+    { name: "Dashboard", path: "/dashboard" },
+  ];
 
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     setAccountOpen(false);
     setMenuOpen(false);
-    navigate("/", { replace: true });
+
+    navigate("/store", { replace: true });
   }
 
   const navLinkClass = ({ isActive }) =>
@@ -55,13 +60,18 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
+
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+
+        {/* Logo */}
         <Link
-          to="/"
+          to="/store"
           className="shrink-0 text-2xl font-extrabold text-indigo-600"
         >
           DigiMart<span className="text-gray-900">.</span>
         </Link>
+
+        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((link) => (
             <NavLink
@@ -73,9 +83,13 @@ export default function Navbar({
             </NavLink>
           ))}
         </nav>
+
         <div className="flex items-center gap-2 sm:gap-3">
+
+          {/* Search */}
           <div className="hidden items-center rounded-full bg-gray-100 px-3 py-2 sm:flex">
             <Search size={18} className="shrink-0 text-gray-500" />
+
             <input
               type="search"
               placeholder="Search products..."
@@ -85,37 +99,47 @@ export default function Navbar({
             />
           </div>
 
+          {/* Cart */}
           <button
             onClick={onOpenCart}
             aria-label="Open shopping cart"
             className="relative rounded-full p-2 hover:bg-gray-100"
           >
             <ShoppingCart size={22} />
+
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-xs text-white">
               {cartCount}
             </span>
           </button>
-          {token ? (
+
+          {/* Account */}
+          {token && user ? (
             <div className="relative hidden md:block">
+
               <button
                 onClick={() => setAccountOpen(!accountOpen)}
                 className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 hover:bg-gray-50"
               >
                 <UserRound size={19} className="text-indigo-600" />
+
                 <span className="max-w-28 truncate text-sm font-medium text-gray-700">
-                  {user?.name || "My Account"}
+                  {user.name || "My Account"}
                 </span>
               </button>
+
               {accountOpen && (
                 <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setAccountOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                  >
-                    <LayoutDashboard size={18} />
-                    My Dashboard
-                  </Link>
+
+                  {user.role === "admin" && (
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                    >
+                      <LayoutDashboard size={18} />
+                      Admin Dashboard
+                    </Link>
+                  )}
 
                   <button
                     onClick={handleLogout}
@@ -124,25 +148,31 @@ export default function Navbar({
                     <LogOut size={18} />
                     Logout
                   </button>
+
                 </div>
               )}
             </div>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
+
               <Link
                 to="/login"
                 className="rounded-full px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
               >
                 Login
               </Link>
+
               <Link
                 to="/signup"
                 className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
               >
                 Sign Up
               </Link>
+
             </div>
           )}
+
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -151,22 +181,35 @@ export default function Navbar({
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
+
         </div>
       </div>
+
+      {/* Mobile Navigation */}
       {menuOpen && (
         <nav className="border-t bg-white p-4 md:hidden">
+
           {links.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               onClick={() => setMenuOpen(false)}
-              className="block rounded-lg px-3 py-3 font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+              className={({ isActive }) =>
+                `block rounded-lg px-3 py-3 font-medium ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-600"
+                    : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                }`
+              }
             >
               {link.name}
             </NavLink>
           ))}
+
+          {/* Mobile Search */}
           <div className="mt-3 flex items-center rounded-lg border px-3 py-2">
             <Search size={18} className="shrink-0 text-gray-500" />
+
             <input
               type="search"
               placeholder="Search products..."
@@ -175,19 +218,14 @@ export default function Navbar({
               className="w-full px-2 py-1 outline-none"
             />
           </div>
-          {token ? (
+
+          {token && user ? (
             <div className="mt-3 space-y-2 border-t pt-3">
+
               <p className="px-3 text-sm text-gray-500">
-                Signed in as {user?.name || user?.email || "Customer"}
+                Signed in as {user.name || user.email}
               </p>
-              <Link
-                to="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-indigo-600 hover:bg-indigo-50"
-              >
-                <LayoutDashboard size={19} />
-                My Dashboard
-              </Link>
+
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left font-medium text-red-600 hover:bg-red-50"
@@ -195,9 +233,11 @@ export default function Navbar({
                 <LogOut size={19} />
                 Logout
               </button>
+
             </div>
           ) : (
             <div className="mt-3 grid grid-cols-2 gap-3 border-t pt-3">
+
               <Link
                 to="/login"
                 onClick={() => setMenuOpen(false)}
@@ -213,10 +253,13 @@ export default function Navbar({
               >
                 Sign Up
               </Link>
+
             </div>
           )}
+
         </nav>
       )}
+
     </header>
   );
 }
