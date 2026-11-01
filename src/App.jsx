@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import {
   BrowserRouter,
@@ -17,6 +16,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQs from "./pages/FAQs";
+import Checkout from "./pages/Checkout";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -31,7 +31,18 @@ const CART_KEY = "digimart_cart";
 function getSavedCart() {
   try {
     const saved = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-    return Array.isArray(saved) ? saved : [];
+
+    if (!Array.isArray(saved)) return [];
+
+    return saved.filter(
+      (item) =>
+        item &&
+        item.id !== undefined &&
+        typeof item.name === "string" &&
+        Number.isFinite(Number(item.price)) &&
+        Number.isInteger(Number(item.quantity)) &&
+        Number(item.quantity) > 0
+    );
   } catch {
     return [];
   }
@@ -54,7 +65,7 @@ function StoreLayout() {
   const [cart, setCart] = useState(getSavedCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Persist cart
+  // Save cart in browser storage
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
@@ -118,6 +129,11 @@ function StoreLayout() {
     );
   }
 
+  function handleOrderPlaced() {
+    setCart([]);
+    localStorage.removeItem(CART_KEY);
+  }
+
   return (
     <>
       <ScrollToTop />
@@ -145,6 +161,17 @@ function StoreLayout() {
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="faqs" element={<FAQs />} />
+
+        {/* Customer Checkout */}
+        <Route
+          path="checkout"
+          element={
+            <Checkout
+              cart={cart}
+              onOrderPlaced={handleOrderPlaced}
+            />
+          }
+        />
 
         <Route
           path="*"
@@ -190,25 +217,27 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/store" replace />} />
+        <Route
+          path="/"
+          element={<Navigate to="/store" replace />}
+        />
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        <Route
-          element={<ProtectedRoute />}
-        >
-          <Route path="/store/*" element={<StoreLayout />} />
-        </Route>
+        {/* Public store: guests can browse and shop */}
+        <Route path="/store/*" element={<StoreLayout />} />
 
-        <Route
-          element={<ProtectedRoute adminOnly />}
-        >
+        {/* Protected admin dashboard */}
+        <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/store" replace />} />
+        <Route
+          path="*"
+          element={<Navigate to="/store" replace />}
+        />
       </Routes>
     </BrowserRouter>
   );
