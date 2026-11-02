@@ -2,24 +2,27 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function ProtectedRoute({ adminOnly = false }) {
-  const token = localStorage.getItem("token");
-
-  let user = null;
-
-  try {
-    user = JSON.parse(localStorage.getItem("user") || "null");
-  } catch {
-    user = null;
-  }
-
   if (adminOnly) {
-    if (!token || !user || user.role !== "admin") {
-      return <Navigate to="/admin-login" replace />;
+    const adminToken = localStorage.getItem("adminToken");
+
+    let adminUser = null;
+
+    try {
+      adminUser = JSON.parse(
+        localStorage.getItem("adminUser") || "null"
+      );
+    } catch {
+      adminUser = null;
     }
 
-    return <Outlet />;
+    if (
+      !adminToken ||
+      !adminUser ||
+      adminUser.role !== "admin"
+    ) {
+      return <Navigate to="/admin-login" replace />;
+    }
   }
 
-  // Public store access
   return <Outlet />;
 }

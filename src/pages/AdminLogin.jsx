@@ -8,7 +8,6 @@ export default function AdminLogin() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,32 +18,31 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const { data } = await api.post("/auth/admin-login", {
-        email,
+      // Correct separate admin login endpoint
+      const { data } = await api.post("/admin/login", {
+        email: email.trim().toLowerCase(),
         password,
       });
 
-      // Verify admin role
-      if (data.user?.role !== "admin") {
-        setError("This account does not have admin access.");
+      if (data.user?.role !== "admin" || !data.token) {
+        setError("Admin authentication failed.");
         return;
       }
 
-      // Save real JWT authentication
-      localStorage.setItem("token", data.token);
-
+      // Store admin authentication separately
+      localStorage.setItem("adminToken", data.token);
       localStorage.setItem(
-        "user",
+        "adminUser",
         JSON.stringify(data.user)
       );
 
-      // Redirect to admin dashboard
+      // Open admin dashboard
       navigate("/dashboard", { replace: true });
 
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Invalid admin email or password."
+        "Unable to sign in. Please check your credentials."
       );
     } finally {
       setLoading(false);
@@ -53,11 +51,9 @@ export default function AdminLogin() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
 
         <div className="mb-8 text-center">
-
           <Link
             to="/store"
             className="text-3xl font-extrabold text-slate-900"
@@ -72,7 +68,6 @@ export default function AdminLogin() {
           <span className="mt-4 inline-block rounded-full bg-indigo-50 px-4 py-1 text-xs font-semibold text-indigo-600">
             Secure Admin Access
           </span>
-
         </div>
 
         {error && (
@@ -120,15 +115,12 @@ export default function AdminLogin() {
             disabled={loading}
             className="w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading
-              ? "Authenticating..."
-              : "Sign In to Dashboard"}
+            {loading ? "Authenticating..." : "Sign In to Dashboard"}
           </button>
 
         </form>
 
         <div className="mt-6 border-t pt-5 text-center">
-
           <Link
             to="/store"
             className="text-sm font-medium text-indigo-600 hover:underline"
@@ -139,7 +131,6 @@ export default function AdminLogin() {
           <p className="mt-4 text-xs text-slate-400">
             Authorized administrators only.
           </p>
-
         </div>
 
       </div>

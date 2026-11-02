@@ -1,638 +1,1083 @@
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
-  ShoppingCart,
+  ShoppingBag,
   Users,
-  Search,
+  LogOut,
   Plus,
   Pencil,
   Trash2,
-  LogOut,
   X,
-  Menu,
-  Store,
+  RefreshCw,
+  Search,
   TrendingUp,
-  IndianRupee,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  Menu,
+  Image as ImageIcon,
+  AlertCircle,
 } from "lucide-react";
-import productsData from "../data/products";
-const categories = ["Fashion", "Electronics", "Accessories"];
-const money = (amount) =>
-  `Rs. ${Number(amount || 0).toLocaleString("en-PK")}`;
-function EmptyState({ title, message }) {
-  return (
-    <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
-      <Package className="mx-auto mb-4 text-gray-400" size={40} />
-      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-        {message}
-      </p>
-    </div>
-  );
-}
+import api from "../api";
+
+const initialProduct = {
+  name: "",
+  category: "Fashion",
+  price: "",
+  image: "",
+  stock: 10,
+  rating: 0,
+};
+
+const statuses = [
+  "Pending",
+  "Processing",
+  "Shipped",
+  "Delivered",
+  "Cancelled",
+];
+
+
+const currency = (amount) =>
+  new Intl.NumberFormat("en-PK", {
+    style: "currency",
+    currency: "PKR",
+    maximumFractionDigits: 0,
+  }).format(Number(amount) || 0);
+
+const formatDate = (date) => {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("en-PK", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getAdminName = () => {
+  try {
+    const admin = JSON.parse(localStorage.getItem("adminUser") || "null");
+    return admin?.name || "Admin";
+  } catch {
+    return "Admin";
+  }
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
   const [activePage, setActivePage] = useState("Overview");
-  const [products, setProducts] = useState(() =>
-    productsData.map((product) => ({
-      ...product,
-      stock: product.stock ?? 10,
-    }))
-  );
-
-  const [search, setSearch] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const emptyForm = {
-    name: "",
-    category: "Fashion",
-    price: "",
-    rating: "4.5",
-    stock: "10",
-    image: "",
-  };
-  const [form, setForm] = useState(emptyForm);
-  const filteredProducts = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(term) ||
-        product.category.toLowerCase().includes(term)
-    );
-  }, [products, search]);
+  const [search, setSearch] = useState("");
+
+  // Products
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState("");
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productDetails, setProductDetails] = useState(initialProduct);
+  const [savingProduct, setSavingProduct] = useState(false);
+
+  // Orders
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+  const [updatingOrder, setUpdatingOrder] = useState("");
+
+  // Dashboard statistics
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0,
+    deliveredOrders: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  const adminName = getAdminName();
+
   const navigation = [
     { name: "Overview", icon: LayoutDashboard },
     { name: "Products", icon: Package },
-    { name: "Orders", icon: ShoppingCart },
+    { name: "Orders", icon: ShoppingBag },
     { name: "Customers", icon: Users },
   ];
 
-  function openAddProduct() {
+  // Fetch products from MongoDB
+  const fetchProducts = useCallback(async () => {
+    setProductsLoading(true);
+    setProductsError("");
+
+    try {
+      const response = await api.get("/products");
+      setProducts(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      setProductsError(
+        error.response?.data?.message || "Unable to load products."
+      );
+    } finally {
+      setProductsLoading(false);
+    }
+  }, []);
+
+  // Fetch all customer orders
+  const fetchOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    setOrdersError("");
+
+    try {
+      const response = await api.get("/orders/admin/all");
+      setOrders(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      setOrdersError(
+        error.response?.data?.message || "Unable to load orders."
+      );
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, []);
+
+  // Fetch dashboard statistics
+  const fetchStats = useCallback(async () => {
+    setStatsLoading(true);
+
+    try {
+      const response = await api.get("/orders/admin/stats");
+      setStats(response.data);
+    } catch (error) {
+      console.error(
+        "Unable to load dashboard statistics:",
+        error.response?.data?.message || error.message
+      );
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchStats();
+  }, [fetchProducts, fetchStats]);
+
+  useEffect(() => {
+    if (activePage === "Orders") {
+      fetchOrders();
+    }
+  }, [activePage, fetchOrders]);
+
+  // Open add product modal
+  const openAddProduct = () => {
     setEditingProduct(null);
-    setForm(emptyForm);
-    setShowModal(true);
-  }
-  function openEditProduct(product) {
+    setProductDetails(initialProduct);
+    setShowProductModal(true);
+  };
+
+  // Open edit product modal
+  const openEditProduct = (product) => {
     setEditingProduct(product);
-    setForm({
-      name: product.name,
-      category: product.category,
-      price: String(product.price),
-      rating: String(product.rating ?? 4.5),
-      stock: String(product.stock ?? 0),
+    setProductDetails({
+      name: product.name || "",
+      category: product.category || "Fashion",
+      price: product.price ?? "",
       image: product.image || "",
+      stock: product.stock ?? 10,
+      rating: product.rating ?? 0,
     });
-    setShowModal(true);
-  }
-  function handleFormChange(event) {
-    const { name, value } = event.target;
-    setForm((previous) => ({ ...previous, [name]: value }));
-  }
-  function saveProduct(event) {
+    setShowProductModal(true);
+  };
+
+  // Save product to MongoDB
+  const saveProduct = async (event) => {
     event.preventDefault();
-    const productDetails = {
-      name: form.name.trim(),
-      category: form.category,
-      price: Number(form.price),
-      rating: Number(form.rating),
-      stock: Number(form.stock),
-      image: form.image.trim(),
-    };
+
     if (
-      !productDetails.name ||
-      !productDetails.image ||
-      !Number.isFinite(productDetails.price) ||
-      productDetails.price < 0 ||
-      !Number.isFinite(productDetails.stock) ||
-      productDetails.stock < 0 ||
-      !Number.isFinite(productDetails.rating) ||
-      productDetails.rating < 0 ||
-      productDetails.rating > 5
+      !productDetails.name.trim() ||
+      !productDetails.image.trim() ||
+      productDetails.price === ""
     ) {
-      alert("Please enter valid product details and an image URL.");
+      alert("Please fill in all required fields.");
       return;
     }
 
-    if (editingProduct) {
-      setProducts((previous) =>
-        previous.map((product) =>
-          product.id === editingProduct.id
-            ? { ...product, ...productDetails }
-            : product
-        )
-      );
-    } else {
-      setProducts((previous) => [
-        ...previous,
-        {
-          id: `product-${Date.now()}`,
-          ...productDetails,
-        },
-      ]);
+    const payload = {
+      ...productDetails,
+      name: productDetails.name.trim(),
+      image: productDetails.image.trim(),
+      price: Number(productDetails.price),
+      stock: Number(productDetails.stock),
+      rating: Number(productDetails.rating),
+    };
+
+    if (
+      !Number.isFinite(payload.price) ||
+      payload.price < 0 ||
+      !Number.isInteger(payload.stock) ||
+      payload.stock < 0 ||
+      !Number.isFinite(payload.rating) ||
+      payload.rating < 0 ||
+      payload.rating > 5
+    ) {
+      alert("Please enter valid price, stock and rating values.");
+      return;
     }
 
-    setShowModal(false);
-    setEditingProduct(null);
-    setForm(emptyForm);
-  }
-  function deleteProduct(productId) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product from the current dashboard session?"
-    );
-    if (!confirmed) return;
-    setProducts((previous) =>
-      previous.filter((product) => product.id !== productId)
-    );
-  }
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("digimartDemoAdmin");
-    navigate("/admin-login", { replace: true });
-  }
+    setSavingProduct(true);
 
-  function changePage(page) {
-    setActivePage(page);
-    setSidebarOpen(false);
-    setSearch("");
-  }
+    try {
+      if (editingProduct) {
+        await api.put(`/products/${editingProduct._id}`, payload);
+      } else {
+        await api.post("/products", payload);
+      }
+
+      setShowProductModal(false);
+      setEditingProduct(null);
+      setProductDetails(initialProduct);
+      await fetchProducts();
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to save the product."
+      );
+    } finally {
+      setSavingProduct(false);
+    }
+  };
+
+  // Delete product from MongoDB
+  const deleteProduct = async (productId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/products/${productId}`);
+      await fetchProducts();
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to delete the product."
+      );
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId, status) => {
+    setUpdatingOrder(orderId);
+
+    try {
+      await api.patch(`/orders/admin/${orderId}/status`, { status });
+      await Promise.all([fetchOrders(), fetchStats()]);
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to update order status."
+      );
+    } finally {
+      setUpdatingOrder("");
+    }
+  };
+
+  // Admin logout
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+    navigate("/admin-login", { replace: true });
+  };
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
+      product.name?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const customerName =
+        order.shippingAddress?.fullName || order.user?.name || "";
+      const orderId = order._id || "";
+
+      return (
+        customerName.toLowerCase().includes(search.toLowerCase()) ||
+        orderId.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+  }, [orders, search]);
+
+  const statCards = [
+    {
+      title: "Total Revenue",
+      value: currency(stats.totalRevenue),
+      icon: DollarSign,
+      description: "From non-cancelled orders",
+    },
+    {
+      title: "Total Orders",
+      value: stats.totalOrders ?? 0,
+      icon: ShoppingBag,
+      description: "All customer orders",
+    },
+    {
+      title: "Pending Orders",
+      value: stats.pendingOrders ?? 0,
+      icon: Clock,
+      description: "Awaiting processing",
+    },
+    {
+      title: "Delivered Orders",
+      value: stats.deliveredOrders ?? 0,
+      icon: CheckCircle,
+      description: "Successfully delivered",
+    },
+  ];
+
+  const statusClass = (status) => {
+    const styles = {
+      Pending: "bg-yellow-100 text-yellow-700",
+      Processing: "bg-blue-100 text-blue-700",
+      Shipped: "bg-purple-100 text-purple-700",
+      Delivered: "bg-green-100 text-green-700",
+      Cancelled: "bg-red-100 text-red-700",
+    };
+
+    return styles[status] || "bg-gray-100 text-gray-700";
+  };
+
+  const pageTitle = {
+    Overview: "Dashboard Overview",
+    Products: "Manage Products",
+    Orders: "Manage Orders",
+    Customers: "Customers",
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
-        />
-      )}
-
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-slate-950 text-white transition-transform duration-200 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
-      >
-        <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
-          <div className="rounded-xl bg-indigo-600 p-2 text-slate-950">
-            <Store size={24} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">DigiMart</h1>
-            <p className="text-xs text-gray-400">Admin Panel</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-2 px-4 py-6">
-          <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Management
-          </p>
-
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const selected = activePage === item.name;
-
-            return (
-              <button
-                type="button"
-                key={item.name}
-                onClick={() => changePage(item.name)}
-                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition ${
-                  selected
-                    ? "bg-indigo-600 font-semibold text-slate-950"
-                    : "text-gray-300 hover:bg-white/10"
-                }`}
-              >
-                <Icon size={19} />
-                <span>{item.name}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="border-t border-white/10 p-4">
-          <div className="mb-4 rounded-lg bg-white/5 p-3">
-            <p className="font-medium">DigiMart Admin</p>
-            <p className="mt-1 text-xs text-gray-400">Administrator</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-gray-300 hover:bg-red-500/10 hover:text-red-400"
-          >
-            <LogOut size={19} />
-            Logout
-          </button>
-        </div>
-      </aside>
-      <main className="min-h-screen lg:ml-64">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 sm:px-8">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Open sidebar"
-              onClick={() => setSidebarOpen(true)}
-              className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
-            >
-              <Menu size={22} />
-            </button>
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gray-950 text-white transition-transform duration-300 lg:static lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex h-20 items-center justify-between border-b border-gray-800 px-6">
             <div>
-              <h2 className="text-xl font-bold sm:text-2xl">
-                {activePage}
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                DigiMart administration
-              </p>
+              <h1 className="text-2xl font-bold">
+                Digi<span className="text-blue-400">Mart</span>
+              </h1>
+              <p className="text-xs text-gray-400">Admin Panel</p>
             </div>
+
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden"
+              aria-label="Close sidebar"
+            >
+              <X size={22} />
+            </button>
           </div>
 
-          <div className="hidden items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm sm:flex">
-            <span className="h-2 w-2 rounded-full bg-green-500" />
-            Admin session
+          <div className="px-5 py-6">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Main Menu
+            </p>
+
+            <nav className="space-y-2">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => {
+                      setActivePage(item.name);
+                      setSearch("");
+                      setSidebarOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition ${
+                      activePage === item.name
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-800"
+                    }`}
+                  >
+                    <Icon size={19} />
+                    <span className="font-medium">{item.name}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
-        </header>
-        <div className="p-4 sm:p-8">
-          {activePage === "Overview" && (
-            <div className="space-y-6">
+
+          <div className="mt-auto border-t border-gray-800 p-5">
+            <div className="mb-4">
+              <p className="text-sm font-semibold">{adminName}</p>
+              <p className="text-xs text-gray-400">Administrator</p>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-red-300 transition hover:bg-red-500/10"
+            >
+              <LogOut size={19} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <button
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu overlay"
+          />
+        )}
+
+        {/* Main content */}
+        <main className="min-w-0 flex-1">
+          {/* Top bar */}
+          <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b bg-white px-4 sm:px-8">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
+                aria-label="Open menu"
+              >
+                <Menu size={23} />
+              </button>
+
               <div>
-                <h3 className="text-lg font-semibold">Dashboard Overview</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Your dashboard is ready. Live business statistics will be
-                  available when the backend is connected.
+                <h2 className="text-lg font-bold sm:text-xl">
+                  {pageTitle[activePage]}
+                </h2>
+                <p className="hidden text-xs text-gray-500 sm:block">
+                  Welcome back, {adminName}
                 </p>
               </div>
+            </div>
 
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {[
-                  {
-                    title: "Total Revenue",
-                    icon: IndianRupee,
-                    message: "No sales data available yet",
-                  },
-                  {
-                    title: "Total Orders",
-                    icon: ShoppingCart,
-                    message: "No order data available yet",
-                  },
-                  {
-                    title: "Total Customers",
-                    icon: Users,
-                    message: "No customer data available yet",
-                  },
-                ].map((card) => {
-                  const Icon = card.icon;
-                  return (
-                    <div
-                      key={card.title}
-                      className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-gray-600">
-                          {card.title}
-                        </p>
-                        <div className="rounded-lg bg-indigo-200 p-3 text-indigo-600">
-                          <Icon size={21} />
-                        </div>
-                      </div>
-                      <p className="mt-5 text-sm text-gray-400">
-                        {card.message}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="text-indigo-600" size={24} />
+            <div className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-2">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span className="text-xs font-medium text-blue-800">
+                Admin Active
+              </span>
+            </div>
+          </header>
+
+          <div className="p-4 sm:p-8">
+            {/* Overview */}
+            {activePage === "Overview" && (
+              <section>
+                <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold">Sales Analytics</h3>
+                    <h3 className="text-xl font-bold">Overview</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      A sales chart will appear when real order data is
-                      available.
+                      Here's what's happening in your store.
                     </p>
                   </div>
-                </div>
-                <div className="mt-6 flex min-h-40 items-center justify-center rounded-lg bg-gray-50 text-sm text-gray-400">
-                  No sales data available yet
-                </div>
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h3 className="font-semibold">Quick Actions</h3>
-                <div className="mt-4 flex flex-wrap gap-3">
+
                   <button
-                    type="button"
                     onClick={() => {
-                      changePage("Products");
-                      openAddProduct();
+                      fetchStats();
+                      fetchProducts();
                     }}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-200 px-4 py-3 font-semibold text-slate-950 hover:bg-indigo-600"
+                    className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <RefreshCw size={16} />
+                    Refresh
+                  </button>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                  {statCards.map((card) => {
+                    const Icon = card.icon;
+
+                    return (
+                      <div
+                        key={card.title}
+                        className="rounded-xl border bg-white p-5 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-gray-500">
+                            {card.title}
+                          </p>
+                          <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
+                            <Icon size={21} />
+                          </div>
+                        </div>
+
+                        <p className="mt-4 text-2xl font-bold">
+                          {statsLoading ? "..." : card.value}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400">
+                          {card.description}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-7 grid gap-5 lg:grid-cols-2">
+                  <div className="rounded-xl border bg-white p-6 shadow-sm">
+                    <h3 className="font-bold">Products</h3>
+                    <p className="mt-2 text-3xl font-bold">
+                      {productsLoading ? "..." : products.length}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Products currently in your store
+                    </p>
+                    <button
+                      onClick={() => setActivePage("Products")}
+                      className="mt-5 text-sm font-semibold text-blue-600 hover:underline"
+                    >
+                      Manage products →
+                    </button>
+                  </div>
+
+                  <div className="rounded-xl border bg-white p-6 shadow-sm">
+                    <h3 className="font-bold">Orders</h3>
+                    <p className="mt-2 text-3xl font-bold">
+                      {statsLoading ? "..." : stats.totalOrders ?? 0}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Customer orders received
+                    </p>
+                    <button
+                      onClick={() => setActivePage("Orders")}
+                      className="mt-5 text-sm font-semibold text-blue-600 hover:underline"
+                    >
+                      View orders →
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Products */}
+            {activePage === "Products" && (
+              <section>
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xl font-bold">All Products</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Add, edit and delete store products.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={openAddProduct}
+                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                   >
                     <Plus size={18} />
                     Add Product
                   </button>
+                </div>
+
+                <div className="mb-5 flex flex-wrap gap-3">
+                  <div className="relative max-w-md flex-1">
+                    <Search
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search products..."
+                      className="w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+                    />
+                  </div>
+
                   <button
-                    type="button"
-                    onClick={() => changePage("Products")}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-200 px-4 py-3 font-semibold text-slate-950 hover:bg-indigo-600"
+                    onClick={fetchProducts}
+                    className="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
                   >
-                    <Package size={18} />
-                    Manage Products
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => changePage("Orders")}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-200 px-4 py-3 font-semibold text-slate-950 hover:bg-indigo-600"
-                  >
-                    <ShoppingCart size={18} />
-                    View Orders
+                    <RefreshCw size={17} />
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-          {activePage === "Products" && (
-            <div className="space-y-6">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div>
-                  <h3 className="text-lg font-semibold">Product Management</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Manage the products shown in your current dashboard session.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openAddProduct}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-200 px-4 py-3 font-semibold text-slate-950 hover:bg-indigo-600"
-                >
-                  <Plus size={18} />
-                  Add Product
-                </button>
-              </div>
-              <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-                <Search size={20} className="text-gray-400" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search products or categories..."
-                  className="w-full bg-transparent outline-none"
-                />
-              </div>
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[760px] text-left text-sm">
-                    <thead className="bg-gray-50 text-gray-500">
+
+                {productsError && (
+                  <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                    <AlertCircle size={18} />
+                    {productsError}
+                  </div>
+                )}
+
+                <div className="overflow-x-auto rounded-xl border bg-white shadow-sm">
+                  <table className="w-full min-w-[700px] text-left text-sm">
+                    <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                       <tr>
-                        <th className="px-5 py-4 font-semibold">Product</th>
-                        <th className="px-5 py-4 font-semibold">Category</th>
-                        <th className="px-5 py-4 font-semibold">Price</th>
-                        <th className="px-5 py-4 font-semibold">Rating</th>
-                        <th className="px-5 py-4 font-semibold">Stock</th>
-                        <th className="px-5 py-4 font-semibold">Actions</th>
+                        <th className="px-5 py-4">Product</th>
+                        <th className="px-5 py-4">Category</th>
+                        <th className="px-5 py-4">Price</th>
+                        <th className="px-5 py-4">Stock</th>
+                        <th className="px-5 py-4">Rating</th>
+                        <th className="px-5 py-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {filteredProducts.map((product) => (
-                        <tr key={product.id} className="hover:bg-gray-50">
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
-                              />
-                              <span className="font-semibold text-gray-800">
-                                {product.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 text-gray-600">
-                            {product.category}
-                          </td>
-                          <td className="px-5 py-4 font-semibold">
-                            {money(product.price)}
-                          </td>
-                          <td className="px-5 py-4 text-amber-500">
-                            ★ {product.rating}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                                product.stock > 0
-                                  ? "bg-green-50 text-green-700"
-                                  : "bg-red-50 text-red-700"
-                              }`}
-                            >
-                              {product.stock > 0
-                                ? `${product.stock} in stock`
-                                : "Out of stock"}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                title="Edit product"
-                                onClick={() => openEditProduct(product)}
-                                className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                              >
-                                <Pencil size={17} />
-                              </button>
-                              <button
-                                type="button"
-                                title="Delete product"
-                                onClick={() => deleteProduct(product.id)}
-                                className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 size={17} />
-                              </button>
-                            </div>
+
+                    <tbody className="divide-y">
+                      {productsLoading ? (
+                        <tr>
+                          <td colSpan="6" className="px-5 py-10 text-center">
+                            Loading products...
                           </td>
                         </tr>
-                      ))}
-                      {filteredProducts.length === 0 && (
+                      ) : filteredProducts.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={6}
-                            className="px-5 py-12 text-center text-gray-500"
+                            colSpan="6"
+                            className="px-5 py-10 text-center text-gray-500"
                           >
                             No products found.
                           </td>
                         </tr>
+                      ) : (
+                        filteredProducts.map((product) => (
+                          <tr key={product._id} className="hover:bg-gray-50">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                {product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="h-12 w-12 rounded-lg object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
+                                    <ImageIcon size={20} />
+                                  </div>
+                                )}
+                                <span className="font-semibold">
+                                  {product.name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">{product.category}</td>
+                            <td className="px-5 py-4 font-medium">
+                              {currency(product.price)}
+                            </td>
+                            <td className="px-5 py-4">{product.stock}</td>
+                            <td className="px-5 py-4">
+                              ⭐ {product.rating ?? 0}
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => openEditProduct(product)}
+                                  className="rounded-lg bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
+                                  aria-label="Edit product"
+                                >
+                                  <Pencil size={17} />
+                                </button>
+                                <button
+                                  onClick={() => deleteProduct(product._id)}
+                                  className="rounded-lg bg-red-50 p-2 text-red-600 hover:bg-red-100"
+                                  aria-label="Delete product"
+                                >
+                                  <Trash2 size={17} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
                       )}
                     </tbody>
                   </table>
                 </div>
-              </div>
-              <p className="text-sm text-gray-500">
-                Showing {filteredProducts.length} of {products.length} products.
-                Changes are temporary and will reset when you refresh.
-              </p>
-            </div>
-          )}
-          {activePage === "Orders" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold">Order Management</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  This section is ready for integration with your order API.
-                </p>
-              </div>
-              <EmptyState
-                title="No Orders Yet"
-                message="No order records are connected yet. Customer orders will appear here after order storage and the backend API are implemented."
-              />
-            </div>
-          )}
-          {activePage === "Customers" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold">Customer Management</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  This section is ready for integration with your customer API.
-                </p>
-              </div>
-              <EmptyState
-                title="No Customers Yet"
-                message="No customer records are displayed. Registered customer data will appear here when the backend integration is implemented."
-              />
-            </div>
-          )}
-        </div>
-      </main>
-      {showModal && (
+              </section>
+            )}
+
+            {/* Orders */}
+            {activePage === "Orders" && (
+              <section>
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xl font-bold">Customer Orders</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      View orders and update their delivery status.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      fetchOrders();
+                      fetchStats();
+                    }}
+                    className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm hover:bg-gray-50"
+                  >
+                    <RefreshCw size={17} />
+                    Refresh
+                  </button>
+                </div>
+
+                <div className="relative mb-5 max-w-md">
+                  <Search
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by customer or order ID..."
+                    className="w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {ordersError && (
+                  <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                    {ordersError}
+                  </div>
+                )}
+
+                {ordersLoading ? (
+                  <div className="rounded-xl border bg-white p-10 text-center">
+                    Loading orders...
+                  </div>
+                ) : filteredOrders.length === 0 ? (
+                  <div className="rounded-xl border bg-white p-10 text-center">
+                    <ShoppingBag
+                      size={35}
+                      className="mx-auto mb-3 text-gray-300"
+                    />
+                    <p className="font-semibold">No orders found</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Customer orders will appear here after checkout.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    {filteredOrders.map((order) => (
+                      <article
+                        key={order._id}
+                        className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-4 border-b bg-gray-50 p-5">
+                          <div>
+                            <p className="font-bold">
+                              Order #{order._id?.slice(-8).toUpperCase()}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-500">
+                              Placed on {formatDate(order.createdAt)}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
+                                order.status
+                              )}`}
+                            >
+                              {order.status}
+                            </span>
+
+                            <select
+                              value={order.status}
+                              disabled={updatingOrder === order._id}
+                              onChange={(e) =>
+                                updateOrderStatus(order._id, e.target.value)
+                              }
+                              className="rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 disabled:opacity-50"
+                            >
+                              {statuses.map((status) => (
+                                <option key={status} value={status}>
+                                  {status}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-6 p-5 lg:grid-cols-2">
+                          <div>
+                            <h4 className="mb-3 font-bold">
+                              Customer Information
+                            </h4>
+                            <div className="space-y-2 text-sm text-gray-600">
+                              <p>
+                                <strong className="text-gray-800">Name:</strong>{" "}
+                                {order.shippingAddress?.fullName ||
+                                  order.user?.name ||
+                                  "N/A"}
+                              </p>
+                              <p>
+                                <strong className="text-gray-800">Email:</strong>{" "}
+                                {order.user?.email || "N/A"}
+                              </p>
+                              <p>
+                                <strong className="text-gray-800">Phone:</strong>{" "}
+                                {order.shippingAddress?.phone || "N/A"}
+                              </p>
+                              <p>
+                                <strong className="text-gray-800">
+                                  Address:
+                                </strong>{" "}
+                                {[
+                                  order.shippingAddress?.address,
+                                  order.shippingAddress?.city,
+                                  order.shippingAddress?.postalCode,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ") || "N/A"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="mb-3 font-bold">Order Summary</h4>
+                            <div className="space-y-3">
+                              {(order.items || []).map((item, index) => (
+                                <div
+                                  key={`${item.productId}-${index}`}
+                                  className="flex items-center justify-between gap-3 text-sm"
+                                >
+                                  <div className="flex min-w-0 items-center gap-3">
+                                    {item.image ? (
+                                      <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className="h-11 w-11 rounded-lg object-cover"
+                                      />
+                                    ) : (
+                                      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100">
+                                        <Package size={18} />
+                                      </div>
+                                    )}
+                                    <div className="min-w-0">
+                                      <p className="truncate font-medium">
+                                        {item.name}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Qty: {item.quantity}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <p className="whitespace-nowrap font-medium">
+                                    {currency(item.price * item.quantity)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t p-5">
+                          <div className="text-sm text-gray-500">
+                            <p>
+                              Payment:{" "}
+                              <strong className="text-gray-800">
+                                {order.paymentMethod || "Cash on Delivery"}
+                              </strong>
+                            </p>
+                            <p className="mt-1">
+                              Payment status:{" "}
+                              <strong className="text-gray-800">
+                                {order.paymentStatus || "Pending"}
+                              </strong>
+                            </p>
+                          </div>
+
+                          <p className="text-lg font-bold">
+                            Total: {currency(order.totalAmount)}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Customers */}
+            {activePage === "Customers" && (
+              <section>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold">Customers</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Customer management.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border bg-white p-10 text-center">
+                  <Users
+                    size={38}
+                    className="mx-auto mb-3 text-gray-300"
+                  />
+                  <h3 className="font-bold">Customer management</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Customer records are stored in MongoDB. A dedicated
+                    customer listing API is not connected to this page yet.
+                  </p>
+                </div>
+              </section>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Add/Edit Product Modal */}
+      {showProductModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-          <div className="my-auto w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
+          <div className="my-6 w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b p-5">
               <div>
                 <h3 className="text-lg font-bold">
                   {editingProduct ? "Edit Product" : "Add New Product"}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter the product details below.
+                <p className="mt-1 text-xs text-gray-500">
+                  Product information is saved in MongoDB.
                 </p>
               </div>
+
               <button
-                type="button"
-                aria-label="Close modal"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowProductModal(false)}
                 className="rounded-lg p-2 hover:bg-gray-100"
+                aria-label="Close modal"
               >
-                <X size={20} />
+                <X size={21} />
               </button>
             </div>
-            <form onSubmit={saveProduct} className="space-y-4 p-6">
+
+            <form onSubmit={saveProduct} className="space-y-4 p-5">
               <div>
                 <label className="mb-1 block text-sm font-medium">
-                  Product Name
+                  Product Name *
                 </label>
                 <input
                   required
-                  name="name"
-                  value={form.name}
-                  onChange={handleFormChange}
+                  value={productDetails.name}
+                  onChange={(e) =>
+                    setProductDetails({
+                      ...productDetails,
+                      name: e.target.value,
+                    })
+                  }
                   placeholder="Enter product name"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-blue-500"
                 />
               </div>
+
               <div>
                 <label className="mb-1 block text-sm font-medium">
-                  Category
+                  Category *
                 </label>
                 <select
-                  name="category"
-                  value={form.category}
-                  onChange={handleFormChange}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
+                  value={productDetails.category}
+                  onChange={(e) =>
+                    setProductDetails({
+                      ...productDetails,
+                      category: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-lg border bg-white px-4 py-3 text-sm outline-none focus:border-blue-500"
                 >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
+                  <option value="Fashion">Fashion</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Accessories">Accessories</option>
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium">
-                    Price (Rs.)
+                    Price (PKR) *
                   </label>
                   <input
                     required
-                    min="0"
                     type="number"
-                    name="price"
-                    value={form.price}
-                    onChange={handleFormChange}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
+                    min="0"
+                    step="0.01"
+                    value={productDetails.price}
+                    onChange={(e) =>
+                      setProductDetails({
+                        ...productDetails,
+                        price: e.target.value,
+                      })
+                    }
+                    placeholder="2500"
+                    className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-blue-500"
                   />
                 </div>
+
                 <div>
                   <label className="mb-1 block text-sm font-medium">
-                    Stock Quantity
+                    Stock *
                   </label>
                   <input
                     required
-                    min="0"
                     type="number"
-                    name="stock"
-                    value={form.stock}
-                    onChange={handleFormChange}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
+                    min="0"
+                    step="1"
+                    value={productDetails.stock}
+                    onChange={(e) =>
+                      setProductDetails({
+                        ...productDetails,
+                        stock: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="mb-1 block text-sm font-medium">
-                  Rating (0 - 5)
-                </label>
-                <input
-                  required
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  type="number"
-                  name="rating"
-                  value={form.rating}
-                  onChange={handleFormChange}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Image URL
+                  Image URL *
                 </label>
                 <input
                   required
                   type="url"
-                  name="image"
-                  value={form.image}
-                  onChange={handleFormChange}
+                  value={productDetails.image}
+                  onChange={(e) =>
+                    setProductDetails({
+                      ...productDetails,
+                      image: e.target.value,
+                    })
+                  }
                   placeholder="https://example.com/product.jpg"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  Rating (0–5)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={productDetails.rating}
+                  onChange={(e) =>
+                    setProductDetails({
+                      ...productDetails,
+                      rating: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-3 font-medium hover:bg-gray-50"
+                  onClick={() => setShowProductModal(false)}
+                  className="flex-1 rounded-lg border px-4 py-3 text-sm font-semibold hover:bg-gray-50"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="flex-1 rounded-lg bg-indigo-200 hover:bg-indigo-600 px-4 py-3 font-semibold text-slate-950 "
+                  disabled={savingProduct}
+                  className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {editingProduct ? "Save Changes" : "Add Product"}
+                  {savingProduct
+                    ? "Saving..."
+                    : editingProduct
+                    ? "Update Product"
+                    : "Add Product"}
                 </button>
               </div>
             </form>

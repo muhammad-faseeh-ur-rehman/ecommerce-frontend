@@ -62,16 +62,12 @@ export default function Navbar({
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
 
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-
-        {/* Logo */}
         <Link
           to="/store"
           className="shrink-0 text-2xl font-extrabold text-indigo-600"
         >
           DigiMart<span className="text-gray-900">.</span>
         </Link>
-
-        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((link) => (
             <NavLink
@@ -85,8 +81,6 @@ export default function Navbar({
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-
-          {/* Search */}
           <div className="hidden items-center rounded-full bg-gray-100 px-3 py-2 sm:flex">
             <Search size={18} className="shrink-0 text-gray-500" />
 
@@ -99,7 +93,6 @@ export default function Navbar({
             />
           </div>
 
-          {/* Cart */}
           <button
             onClick={onOpenCart}
             aria-label="Open shopping cart"
@@ -112,7 +105,6 @@ export default function Navbar({
             </span>
           </button>
 
-          {/* Account */}
           {token && user ? (
             <div className="relative hidden md:block">
 
@@ -172,7 +164,6 @@ export default function Navbar({
             </div>
           )}
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -185,7 +176,6 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {menuOpen && (
         <nav className="border-t bg-white p-4 md:hidden">
 
@@ -206,7 +196,6 @@ export default function Navbar({
             </NavLink>
           ))}
 
-          {/* Mobile Search */}
           <div className="mt-3 flex items-center rounded-lg border px-3 py-2">
             <Search size={18} className="shrink-0 text-gray-500" />
 

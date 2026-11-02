@@ -10,7 +10,7 @@ import {
   Watch,
   ShoppingBag,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 import ProductList from "../components/ProductList";
 import herosub from "../assets/herosub.jpg";
 
