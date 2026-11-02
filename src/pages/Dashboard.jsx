@@ -73,7 +73,6 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Products
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState("");
@@ -82,13 +81,11 @@ export default function Dashboard() {
   const [productDetails, setProductDetails] = useState(initialProduct);
   const [savingProduct, setSavingProduct] = useState(false);
 
-  // Orders
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
   const [updatingOrder, setUpdatingOrder] = useState("");
 
-  // Dashboard statistics
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -106,7 +103,6 @@ export default function Dashboard() {
     { name: "Customers", icon: Users },
   ];
 
-  // Fetch products from MongoDB
   const fetchProducts = useCallback(async () => {
     setProductsLoading(true);
     setProductsError("");
@@ -123,7 +119,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Fetch all customer orders
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true);
     setOrdersError("");
@@ -140,7 +135,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Fetch dashboard statistics
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
 
@@ -168,14 +162,12 @@ export default function Dashboard() {
     }
   }, [activePage, fetchOrders]);
 
-  // Open add product modal
   const openAddProduct = () => {
     setEditingProduct(null);
     setProductDetails(initialProduct);
     setShowProductModal(true);
   };
 
-  // Open edit product modal
   const openEditProduct = (product) => {
     setEditingProduct(product);
     setProductDetails({
@@ -188,8 +180,6 @@ export default function Dashboard() {
     });
     setShowProductModal(true);
   };
-
-  // Save product to MongoDB
   const saveProduct = async (event) => {
     event.preventDefault();
 
@@ -246,7 +236,6 @@ export default function Dashboard() {
     }
   };
 
-  // Delete product from MongoDB
   const deleteProduct = async (productId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -263,8 +252,6 @@ export default function Dashboard() {
       );
     }
   };
-
-  // Update order status
   const updateOrderStatus = async (orderId, status) => {
     setUpdatingOrder(orderId);
 
@@ -280,7 +267,6 @@ export default function Dashboard() {
     }
   };
 
-  // Admin logout
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
@@ -355,7 +341,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gray-950 text-white transition-transform duration-300 lg:static lg:translate-x-0 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -425,7 +410,6 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        {/* Mobile overlay */}
         {sidebarOpen && (
           <button
             className="fixed inset-0 z-30 bg-black/50 lg:hidden"
@@ -434,9 +418,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Main content */}
         <main className="min-w-0 flex-1">
-          {/* Top bar */}
           <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b bg-white px-4 sm:px-8">
             <div className="flex items-center gap-3">
               <button
@@ -466,7 +448,6 @@ export default function Dashboard() {
           </header>
 
           <div className="p-4 sm:p-8">
-            {/* Overview */}
             {activePage === "Overview" && (
               <section>
                 <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
@@ -554,7 +535,6 @@ export default function Dashboard() {
               </section>
             )}
 
-            {/* Products */}
             {activePage === "Products" && (
               <section>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -688,7 +668,6 @@ export default function Dashboard() {
               </section>
             )}
 
-            {/* Orders */}
             {activePage === "Orders" && (
               <section>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -915,7 +894,6 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* Add/Edit Product Modal */}
       {showProductModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
           <div className="my-6 w-full max-w-lg rounded-2xl bg-white shadow-xl">
