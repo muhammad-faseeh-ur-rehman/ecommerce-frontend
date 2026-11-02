@@ -86,7 +86,6 @@ function StoreLayout() {
         }
 
         if (isMounted) {
-          // Use MongoDB _id as the cart's product ID
           const formattedProducts = data.map((product) => ({
             ...product,
             id: product._id,
@@ -116,12 +115,10 @@ function StoreLayout() {
     };
   }, [reloadProducts]);
 
-  // Save cart in browser storage
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
-  // Search and category filtering
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch = product.name
@@ -284,10 +281,8 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Public store */}
         <Route path="/store/*" element={<StoreLayout />} />
 
-        {/* Admin dashboard */}
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
