@@ -18,7 +18,6 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Correct separate admin login endpoint
       const { data } = await api.post("/admin/login", {
         email: email.trim().toLowerCase(),
         password,
@@ -29,14 +28,13 @@ export default function AdminLogin() {
         return;
       }
 
-      // Store admin authentication separately
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem(
         "adminUser",
         JSON.stringify(data.user)
       );
 
-      // Open admin dashboard
+
       navigate("/dashboard", { replace: true });
 
     } catch (err) {
