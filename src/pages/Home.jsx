@@ -161,7 +161,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Categories */}
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
@@ -217,7 +216,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Promotional Banner */}
       <section className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gray-950 p-8 text-white sm:p-12 md:flex-row md:items-center">
           <div>
@@ -248,7 +246,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Products from MongoDB */}
       <section id="products" className="scroll-mt-24">
         {productsLoading ? (
           <div className="mx-auto max-w-7xl px-5 py-20 text-center">
@@ -278,7 +275,6 @@ export default function Home({
         )}
       </section>
 
-      {/* Benefits */}
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -312,7 +308,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Reviews */}
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 text-center">
           <p className="font-semibold text-indigo-600">
@@ -353,7 +348,6 @@ export default function Home({
         </div>
       </section>
 
-      {/* Newsletter */}
       <section className="bg-indigo-600 px-6 py-16 text-white">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold">
