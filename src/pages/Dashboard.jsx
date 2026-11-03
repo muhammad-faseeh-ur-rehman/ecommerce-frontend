@@ -157,7 +157,7 @@ export default function Dashboard() {
   }, [fetchProducts, fetchStats]);
 
   useEffect(() => {
-    if (activePage === "Orders") {
+    if (activePage === "Orders" || activePage === "Customers") {
       fetchOrders();
     }
   }, [activePage, fetchOrders]);
@@ -291,6 +291,65 @@ export default function Dashboard() {
       );
     });
   }, [orders, search]);
+
+  // Build one customer record per registered user from the orders collection.
+  const customers = useMemo(() => {
+    const customerMap = new Map();
+
+    orders.forEach((order) => {
+      const user = order.user;
+      if (!user || typeof user !== "object" || !user._id) return;
+
+      const customerId = user._id;
+      const existing = customerMap.get(customerId);
+      const shipping = order.shippingAddress || {};
+      const orderTotal = Number(order.totalAmount) || 0;
+
+      if (existing) {
+        existing.totalOrders += 1;
+        if (order.status !== "Cancelled") existing.totalSpent += orderTotal;
+        if (new Date(order.createdAt) > new Date(existing.lastOrderDate)) {
+          existing.lastOrderDate = order.createdAt;
+          existing.lastOrderStatus = order.status || "Pending";
+        }
+        if (!existing.phone && shipping.phone) existing.phone = shipping.phone;
+        if (!existing.address) {
+          existing.address = [shipping.address, shipping.city, shipping.postalCode]
+            .filter(Boolean)
+            .join(", ");
+        }
+      } else {
+        customerMap.set(customerId, {
+          id: customerId,
+          name: shipping.fullName || user.name || "Customer",
+          email: user.email || "N/A",
+          phone: shipping.phone || "N/A",
+          address: [shipping.address, shipping.city, shipping.postalCode]
+            .filter(Boolean)
+            .join(", ") || "N/A",
+          totalOrders: 1,
+          totalSpent: order.status === "Cancelled" ? 0 : orderTotal,
+          lastOrderDate: order.createdAt,
+          lastOrderStatus: order.status || "Pending",
+        });
+      }
+    });
+
+    return Array.from(customerMap.values()).sort(
+      (a, b) => new Date(b.lastOrderDate) - new Date(a.lastOrderDate)
+    );
+  }, [orders]);
+
+  const filteredCustomers = useMemo(() => {
+    const term = search.toLowerCase().trim();
+    if (!term) return customers;
+    return customers.filter((customer) =>
+      [customer.name, customer.email, customer.phone, customer.address]
+        .join(" ")
+        .toLowerCase()
+        .includes(term)
+    );
+  }, [customers, search]);
 
   const statCards = [
     {
@@ -870,24 +929,112 @@ export default function Dashboard() {
             {/* Customers */}
             {activePage === "Customers" && (
               <section>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold">Customers</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Customer management.
-                  </p>
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xl font-bold">Customers</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Customers who have placed orders on DigiMart.
+                    </p>
+                  </div>
+                  <button
+                    onClick={fetchOrders}
+                    disabled={ordersLoading}
+                    className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <RefreshCw size={17} className={ordersLoading ? "animate-spin" : ""} />
+                    Refresh Customers
+                  </button>
                 </div>
 
-                <div className="rounded-xl border bg-white p-10 text-center">
-                  <Users
-                    size={38}
-                    className="mx-auto mb-3 text-gray-300"
-                  />
-                  <h3 className="font-bold">Customer management</h3>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Customer records are stored in MongoDB. A dedicated
-                    customer listing API is not connected to this page yet.
-                  </p>
+                <div className="mb-5 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-500">Total Customers</p>
+                      <span className="rounded-lg bg-blue-50 p-3 text-blue-600"><Users size={21} /></span>
+                    </div>
+                    <p className="mt-3 text-2xl font-bold">{ordersLoading ? "..." : customers.length}</p>
+                    <p className="mt-1 text-xs text-gray-400">Unique registered customers with orders</p>
+                  </div>
+                  <div className="rounded-xl border bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-500">Orders From Customers</p>
+                      <span className="rounded-lg bg-purple-50 p-3 text-purple-600"><ShoppingBag size={21} /></span>
+                    </div>
+                    <p className="mt-3 text-2xl font-bold">{ordersLoading ? "..." : orders.length}</p>
+                    <p className="mt-1 text-xs text-gray-400">Total orders received</p>
+                  </div>
                 </div>
+
+                <div className="relative mb-5 max-w-md">
+                  <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search customers by name, email or phone..."
+                    className="w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {ordersError && (
+                  <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                    <AlertCircle size={18} /> {ordersError}
+                  </div>
+                )}
+
+                <div className="overflow-x-auto rounded-xl border bg-white shadow-sm">
+                  <table className="w-full min-w-[900px] text-left text-sm">
+                    <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-5 py-4">Customer</th>
+                        <th className="px-5 py-4">Contact</th>
+                        <th className="px-5 py-4">Address</th>
+                        <th className="px-5 py-4">Orders</th>
+                        <th className="px-5 py-4">Total Spent</th>
+                        <th className="px-5 py-4">Last Order</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {ordersLoading ? (
+                        <tr><td colSpan="6" className="px-5 py-10 text-center text-gray-500">Loading customers...</td></tr>
+                      ) : filteredCustomers.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="px-5 py-12 text-center">
+                            <Users size={35} className="mx-auto mb-3 text-gray-300" />
+                            <p className="font-semibold">No customers found</p>
+                            <p className="mt-1 text-sm text-gray-500">
+                              {customers.length === 0 ? "Customers will appear here after they place an order." : "Try a different search term."}
+                            </p>
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCustomers.map((customer) => (
+                          <tr key={customer.id} className="hover:bg-gray-50">
+                            <td className="px-5 py-4">
+                              <p className="font-semibold text-gray-800">{customer.name}</p>
+                              <p className="mt-1 text-xs text-gray-400">ID: {String(customer.id).slice(-8)}</p>
+                            </td>
+                            <td className="px-5 py-4">
+                              <p>{customer.email}</p>
+                              <p className="mt-1 text-xs text-gray-500">{customer.phone}</p>
+                            </td>
+                            <td className="max-w-xs whitespace-normal px-5 py-4 text-gray-600">{customer.address}</td>
+                            <td className="px-5 py-4 font-semibold">{customer.totalOrders}</td>
+                            <td className="px-5 py-4 font-semibold">{currency(customer.totalSpent)}</td>
+                            <td className="px-5 py-4">
+                              <p>{formatDate(customer.lastOrderDate)}</p>
+                              <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(customer.lastOrderStatus)}`}>
+                                {customer.lastOrderStatus}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="mt-3 text-xs text-gray-400">
+                  This list is built from customer accounts linked to orders. Customers who have registered but never ordered are not included.
+                </p>
               </section>
             )}
           </div>
