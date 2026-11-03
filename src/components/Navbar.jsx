@@ -9,6 +9,7 @@ import {
   X,
   UserRound,
   LayoutDashboard,
+  Package,
   LogOut,
 } from "lucide-react";
 
@@ -24,8 +25,10 @@ export default function Navbar({
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+  const adminToken = localStorage.getItem("adminToken");
 
   let user = null;
+  let adminUser = null;
 
   try {
     user = JSON.parse(localStorage.getItem("user") || "null");
@@ -33,17 +36,34 @@ export default function Navbar({
     user = null;
   }
 
+  try {
+    adminUser = JSON.parse(
+      localStorage.getItem("adminUser") || "null"
+    );
+  } catch {
+    adminUser = null;
+  }
+
+  const isAdmin =
+    (adminToken && adminUser?.role === "admin") ||
+    user?.role === "admin";
+
+  const isLoggedIn = isAdmin || (token && user);
+
+  const currentUser = isAdmin ? adminUser || user : user;
+
   const links = [
     { name: "Home", path: "/store" },
     { name: "About Us", path: "/store/about" },
     { name: "Contact Us", path: "/store/contact" },
     { name: "FAQs", path: "/store/faqs" },
-    { name: "Dashboard", path: "/dashboard" },
   ];
 
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
 
     setAccountOpen(false);
     setMenuOpen(false);
@@ -58,16 +78,25 @@ export default function Navbar({
         : "text-gray-600 hover:text-indigo-600"
     }`;
 
+  function closeMenus() {
+    setMenuOpen(false);
+    setAccountOpen(false);
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
-
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+
+        {/* Logo */}
         <Link
           to="/store"
+          onClick={closeMenus}
           className="shrink-0 text-2xl font-extrabold text-indigo-600"
         >
           DigiMart<span className="text-gray-900">.</span>
         </Link>
+
+        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((link) => (
             <NavLink
@@ -81,8 +110,13 @@ export default function Navbar({
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+
+          {/* Desktop Search */}
           <div className="hidden items-center rounded-full bg-gray-100 px-3 py-2 sm:flex">
-            <Search size={18} className="shrink-0 text-gray-500" />
+            <Search
+              size={18}
+              className="shrink-0 text-gray-500"
+            />
 
             <input
               type="search"
@@ -93,6 +127,7 @@ export default function Navbar({
             />
           </div>
 
+          {/* Shopping Cart */}
           <button
             onClick={onOpenCart}
             aria-label="Open shopping cart"
@@ -105,31 +140,44 @@ export default function Navbar({
             </span>
           </button>
 
-          {token && user ? (
+          {/* Desktop Account */}
+          {isLoggedIn ? (
             <div className="relative hidden md:block">
 
               <button
                 onClick={() => setAccountOpen(!accountOpen)}
                 className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 hover:bg-gray-50"
               >
-                <UserRound size={19} className="text-indigo-600" />
+                <UserRound
+                  size={19}
+                  className="text-indigo-600"
+                />
 
                 <span className="max-w-28 truncate text-sm font-medium text-gray-700">
-                  {user.name || "My Account"}
+                  {currentUser?.name || "My Account"}
                 </span>
               </button>
 
               {accountOpen && (
                 <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
 
-                  {user.role === "admin" && (
+                  {isAdmin ? (
                     <Link
                       to="/dashboard"
-                      onClick={() => setAccountOpen(false)}
+                      onClick={closeMenus}
                       className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
                     >
                       <LayoutDashboard size={18} />
                       Admin Dashboard
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/my-orders"
+                      onClick={closeMenus}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                    >
+                      <Package size={18} />
+                      My Orders
                     </Link>
                   )}
 
@@ -164,6 +212,7 @@ export default function Navbar({
             </div>
           )}
 
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation"
@@ -176,6 +225,7 @@ export default function Navbar({
         </div>
       </div>
 
+      {/* Mobile Navigation */}
       {menuOpen && (
         <nav className="border-t bg-white p-4 md:hidden">
 
@@ -183,7 +233,7 @@ export default function Navbar({
             <NavLink
               key={link.path}
               to={link.path}
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenus}
               className={({ isActive }) =>
                 `block rounded-lg px-3 py-3 font-medium ${
                   isActive
@@ -196,8 +246,12 @@ export default function Navbar({
             </NavLink>
           ))}
 
+          {/* Mobile Search */}
           <div className="mt-3 flex items-center rounded-lg border px-3 py-2">
-            <Search size={18} className="shrink-0 text-gray-500" />
+            <Search
+              size={18}
+              className="shrink-0 text-gray-500"
+            />
 
             <input
               type="search"
@@ -208,12 +262,34 @@ export default function Navbar({
             />
           </div>
 
-          {token && user ? (
+          {/* Mobile Account */}
+          {isLoggedIn ? (
             <div className="mt-3 space-y-2 border-t pt-3">
 
               <p className="px-3 text-sm text-gray-500">
-                Signed in as {user.name || user.email}
+                Signed in as{" "}
+                {currentUser?.name || currentUser?.email || "User"}
               </p>
+
+              {isAdmin ? (
+                <Link
+                  to="/dashboard"
+                  onClick={closeMenus}
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                >
+                  <LayoutDashboard size={19} />
+                  Admin Dashboard
+                </Link>
+              ) : (
+                <Link
+                  to="/my-orders"
+                  onClick={closeMenus}
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                >
+                  <Package size={19} />
+                  My Orders
+                </Link>
+              )}
 
               <button
                 onClick={handleLogout}
@@ -229,7 +305,7 @@ export default function Navbar({
 
               <Link
                 to="/login"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenus}
                 className="rounded-lg border border-indigo-600 px-4 py-3 text-center font-semibold text-indigo-600"
               >
                 Login
@@ -237,7 +313,7 @@ export default function Navbar({
 
               <Link
                 to="/signup"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenus}
                 className="rounded-lg bg-indigo-600 px-4 py-3 text-center font-semibold text-white"
               >
                 Sign Up
@@ -248,7 +324,6 @@ export default function Navbar({
 
         </nav>
       )}
-
     </header>
   );
 }
