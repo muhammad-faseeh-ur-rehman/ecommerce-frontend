@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import {
   BrowserRouter,
@@ -11,12 +12,13 @@ import {
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Cart from "./components/Cart";
-import MyOrders from "./pages/MyOrders";
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQs from "./pages/FAQs";
 import Checkout from "./pages/Checkout";
+import MyOrders from "./pages/MyOrders";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -70,7 +72,6 @@ function StoreLayout() {
   const [cart, setCart] = useState(getSavedCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Fetch products from MongoDB through the backend API
   useEffect(() => {
     let isMounted = true;
 
@@ -86,12 +87,12 @@ function StoreLayout() {
         }
 
         if (isMounted) {
-          const formattedProducts = data.map((product) => ({
-            ...product,
-            id: product._id,
-          }));
-
-          setProducts(formattedProducts);
+          setProducts(
+            data.map((product) => ({
+              ...product,
+              id: product._id,
+            }))
+          );
         }
       } catch (error) {
         if (isMounted) {
@@ -115,6 +116,7 @@ function StoreLayout() {
     };
   }, [reloadProducts]);
 
+  // Save cart in localStorage whenever it changes.
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
@@ -283,8 +285,14 @@ export default function App() {
 
         <Route path="/store/*" element={<StoreLayout />} />
 
+        {/* Admin dashboard */}
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+
+        {/* Customer dashboard */}
+        <Route element={<ProtectedRoute customerOnly />}>
+          <Route path="/my-orders" element={<MyOrders />} />
         </Route>
 
         <Route
