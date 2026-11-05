@@ -51,7 +51,6 @@ const formatDate = (date) => {
     year: "numeric",
   });
 };
-
 const getAdminName = () => {
   try {
     const admin = JSON.parse(localStorage.getItem("adminUser") || "null");
@@ -60,14 +59,11 @@ const getAdminName = () => {
     return "Admin";
   }
 };
-
 export default function Dashboard() {
   const navigate = useNavigate();
-
   const [activePage, setActivePage] = useState("Overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
-
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState("");
@@ -75,12 +71,10 @@ export default function Dashboard() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(initialProduct);
   const [savingProduct, setSavingProduct] = useState(false);
-
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
   const [updatingOrder, setUpdatingOrder] = useState("");
-
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -88,9 +82,7 @@ export default function Dashboard() {
     deliveredOrders: 0,
   });
   const [statsLoading, setStatsLoading] = useState(false);
-
   const adminName = getAdminName();
-
   const navigation = [
     { name: "Overview", icon: LayoutDashboard },
     { name: "Products", icon: Package },
