@@ -281,7 +281,6 @@ export default function App() {
         <Route element={<ProtectedRoute customerOnly />}>
           <Route path="/my-orders" element={<MyOrders />} />
         </Route>
-
         <Route
           path="*"
           element={<Navigate to="/store" replace />}
