@@ -285,12 +285,10 @@ export default function App() {
 
         <Route path="/store/*" element={<StoreLayout />} />
 
-        {/* Admin dashboard */}
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
-        {/* Customer dashboard */}
         <Route element={<ProtectedRoute customerOnly />}>
           <Route path="/my-orders" element={<MyOrders />} />
         </Route>
