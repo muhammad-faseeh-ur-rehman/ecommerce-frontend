@@ -363,7 +363,6 @@ export default function Dashboard() {
               </h1>
               <p className="text-xs text-gray-400">Admin Panel</p>
             </div>
-
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden"
@@ -372,16 +371,13 @@ export default function Dashboard() {
               <X size={22} />
             </button>
           </div>
-
           <div className="px-5 py-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
               Main Menu
             </p>
-
             <nav className="space-y-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
-
                 return (
                   <button
                     key={item.name}
@@ -403,13 +399,11 @@ export default function Dashboard() {
               })}
             </nav>
           </div>
-
           <div className="mt-auto border-t border-gray-800 p-5">
             <div className="mb-4">
               <p className="text-sm font-semibold">{adminName}</p>
               <p className="text-xs text-gray-400">Administrator</p>
             </div>
-
             <button
               onClick={handleLogout}
               className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-red-300 transition hover:bg-red-500/10"
@@ -419,7 +413,6 @@ export default function Dashboard() {
             </button>
           </div>
         </aside>
-
         {sidebarOpen && (
           <button
             className="fixed inset-0 z-30 bg-black/50 lg:hidden"
@@ -427,7 +420,6 @@ export default function Dashboard() {
             aria-label="Close menu overlay"
           />
         )}
-
         <main className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b bg-white px-4 sm:px-8">
             <div className="flex items-center gap-3">
@@ -438,7 +430,6 @@ export default function Dashboard() {
               >
                 <Menu size={23} />
               </button>
-
               <div>
                 <h2 className="text-lg font-bold sm:text-xl">
                   {pageTitle[activePage]}
@@ -448,7 +439,6 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-2">
               <span className="h-2 w-2 rounded-full bg-green-500" />
               <span className="text-xs font-medium text-blue-800">
@@ -456,7 +446,6 @@ export default function Dashboard() {
               </span>
             </div>
           </header>
-
           <div className="p-4 sm:p-8">
             {activePage === "Overview" && (
               <section>
@@ -467,7 +456,6 @@ export default function Dashboard() {
                       Here's what's happening in your store.
                     </p>
                   </div>
-
                   <button
                     onClick={() => {
                       fetchStats();
@@ -479,11 +467,9 @@ export default function Dashboard() {
                     Refresh
                   </button>
                 </div>
-
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                   {statCards.map((card) => {
                     const Icon = card.icon;
-
                     return (
                       <div
                         key={card.title}
@@ -497,7 +483,6 @@ export default function Dashboard() {
                             <Icon size={21} />
                           </div>
                         </div>
-
                         <p className="mt-4 text-2xl font-bold">
                           {statsLoading ? "..." : card.value}
                         </p>
@@ -508,7 +493,6 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
-
                 <div className="mt-7 grid gap-5 lg:grid-cols-2">
                   <div className="rounded-xl border bg-white p-6 shadow-sm">
                     <h3 className="font-bold">Products</h3>
@@ -525,7 +509,6 @@ export default function Dashboard() {
                       Manage products →
                     </button>
                   </div>
-
                   <div className="rounded-xl border bg-white p-6 shadow-sm">
                     <h3 className="font-bold">Orders</h3>
                     <p className="mt-2 text-3xl font-bold">
@@ -544,7 +527,6 @@ export default function Dashboard() {
                 </div>
               </section>
             )}
-
             {activePage === "Products" && (
               <section>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -554,7 +536,6 @@ export default function Dashboard() {
                       Add, edit and delete store products.
                     </p>
                   </div>
-
                   <button
                     onClick={openAddProduct}
                     className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
