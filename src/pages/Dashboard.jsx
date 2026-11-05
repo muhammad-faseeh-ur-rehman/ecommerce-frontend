@@ -238,39 +238,31 @@ export default function Dashboard() {
     localStorage.removeItem("adminUser");
     navigate("/admin-login", { replace: true });
   };
-
   const filteredProducts = useMemo(() => {
     return products.filter((product) =>
       product.name?.toLowerCase().includes(search.toLowerCase())
     );
   }, [products, search]);
-
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const customerName =
         order.shippingAddress?.fullName || order.user?.name || "";
       const orderId = order._id || "";
-
       return (
         customerName.toLowerCase().includes(search.toLowerCase()) ||
         orderId.toLowerCase().includes(search.toLowerCase())
       );
     });
   }, [orders, search]);
-
-  // Build one customer record per registered user from the orders collection.
   const customers = useMemo(() => {
     const customerMap = new Map();
-
     orders.forEach((order) => {
       const user = order.user;
       if (!user || typeof user !== "object" || !user._id) return;
-
       const customerId = user._id;
       const existing = customerMap.get(customerId);
       const shipping = order.shippingAddress || {};
       const orderTotal = Number(order.totalAmount) || 0;
-
       if (existing) {
         existing.totalOrders += 1;
         if (order.status !== "Cancelled") existing.totalSpent += orderTotal;
@@ -300,12 +292,10 @@ export default function Dashboard() {
         });
       }
     });
-
     return Array.from(customerMap.values()).sort(
       (a, b) => new Date(b.lastOrderDate) - new Date(a.lastOrderDate)
     );
   }, [orders]);
-
   const filteredCustomers = useMemo(() => {
     const term = search.toLowerCase().trim();
     if (!term) return customers;
@@ -316,7 +306,6 @@ export default function Dashboard() {
         .includes(term)
     );
   }, [customers, search]);
-
   const statCards = [
     {
       title: "Total Revenue",
@@ -343,7 +332,6 @@ export default function Dashboard() {
       description: "Successfully delivered",
     },
   ];
-
   const statusClass = (status) => {
     const styles = {
       Pending: "bg-yellow-100 text-yellow-700",
@@ -352,17 +340,14 @@ export default function Dashboard() {
       Delivered: "bg-green-100 text-green-700",
       Cancelled: "bg-red-100 text-red-700",
     };
-
     return styles[status] || "bg-gray-100 text-gray-700";
   };
-
   const pageTitle = {
     Overview: "Dashboard Overview",
     Products: "Manage Products",
     Orders: "Manage Orders",
     Customers: "Customers",
   };
-
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
       <div className="flex min-h-screen">
