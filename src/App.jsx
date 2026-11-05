@@ -229,7 +229,6 @@ function StoreLayout() {
             />
           }
         />
-
         <Route
           path="*"
           element={
@@ -237,15 +236,12 @@ function StoreLayout() {
               <h1 className="text-6xl font-extrabold text-indigo-600">
                 404
               </h1>
-
               <h2 className="mt-4 text-2xl font-bold">
                 Page Not Found
               </h2>
-
               <p className="mt-3 text-gray-600">
                 Sorry, this page does not exist.
               </p>
-
               <Link
                 to="/store"
                 className="mt-6 rounded-full bg-indigo-600 px-7 py-3 font-semibold text-white"
@@ -256,9 +252,7 @@ function StoreLayout() {
           }
         />
       </Routes>
-
       <Footer />
-
       <Cart
         cart={cart}
         isOpen={isCartOpen}
@@ -269,7 +263,6 @@ function StoreLayout() {
     </>
   );
 }
-
 export default function App() {
   return (
     <BrowserRouter>
