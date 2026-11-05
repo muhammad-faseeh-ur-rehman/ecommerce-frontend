@@ -544,7 +544,6 @@ export default function Dashboard() {
                     Add Product
                   </button>
                 </div>
-
                 <div className="mb-5 flex flex-wrap gap-3">
                   <div className="relative max-w-md flex-1">
                     <Search
@@ -558,7 +557,6 @@ export default function Dashboard() {
                       className="w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
                     />
                   </div>
-
                   <button
                     onClick={fetchProducts}
                     className="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
@@ -566,14 +564,12 @@ export default function Dashboard() {
                     <RefreshCw size={17} />
                   </button>
                 </div>
-
                 {productsError && (
                   <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-700">
                     <AlertCircle size={18} />
                     {productsError}
                   </div>
                 )}
-
                 <div className="overflow-x-auto rounded-xl border bg-white shadow-sm">
                   <table className="w-full min-w-[700px] text-left text-sm">
                     <thead className="bg-gray-50 text-xs uppercase text-gray-500">
@@ -586,7 +582,6 @@ export default function Dashboard() {
                         <th className="px-5 py-4 text-right">Actions</th>
                       </tr>
                     </thead>
-
                     <tbody className="divide-y">
                       {productsLoading ? (
                         <tr>
@@ -658,7 +653,6 @@ export default function Dashboard() {
                 </div>
               </section>
             )}
-
             {activePage === "Orders" && (
               <section>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -668,7 +662,6 @@ export default function Dashboard() {
                       View orders and update their delivery status.
                     </p>
                   </div>
-
                   <button
                     onClick={() => {
                       fetchOrders();
@@ -680,7 +673,6 @@ export default function Dashboard() {
                     Refresh
                   </button>
                 </div>
-
                 <div className="relative mb-5 max-w-md">
                   <Search
                     size={18}
@@ -693,13 +685,11 @@ export default function Dashboard() {
                     className="w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
                   />
                 </div>
-
                 {ordersError && (
                   <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
                     {ordersError}
                   </div>
                 )}
-
                 {ordersLoading ? (
                   <div className="rounded-xl border bg-white p-10 text-center">
                     Loading orders...
@@ -731,7 +721,6 @@ export default function Dashboard() {
                               Placed on {formatDate(order.createdAt)}
                             </p>
                           </div>
-
                           <div className="flex flex-wrap items-center gap-3">
                             <span
                               className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
@@ -740,7 +729,6 @@ export default function Dashboard() {
                             >
                               {order.status}
                             </span>
-
                             <select
                               value={order.status}
                               disabled={updatingOrder === order._id}
