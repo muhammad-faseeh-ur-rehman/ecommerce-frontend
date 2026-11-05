@@ -271,17 +271,13 @@ export default function App() {
           path="/"
           element={<Navigate to="/store" replace />}
         />
-
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-
         <Route path="/store/*" element={<StoreLayout />} />
-
         <Route element={<ProtectedRoute adminOnly />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
-
         <Route element={<ProtectedRoute customerOnly />}>
           <Route path="/my-orders" element={<MyOrders />} />
         </Route>
