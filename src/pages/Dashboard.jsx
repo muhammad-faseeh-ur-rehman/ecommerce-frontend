@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,7 +21,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import api from "../api";
-
 const initialProduct = {
   name: "",
   category: "Fashion",
@@ -31,7 +29,6 @@ const initialProduct = {
   stock: 10,
   rating: 0,
 };
-
 const statuses = [
   "Pending",
   "Processing",
@@ -39,8 +36,6 @@ const statuses = [
   "Delivered",
   "Cancelled",
 ];
-
-
 const currency = (amount) =>
   new Intl.NumberFormat("en-PK", {
     style: "currency",
