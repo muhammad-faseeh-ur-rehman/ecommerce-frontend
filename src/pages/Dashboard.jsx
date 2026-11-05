@@ -89,11 +89,9 @@ export default function Dashboard() {
     { name: "Orders", icon: ShoppingBag },
     { name: "Customers", icon: Users },
   ];
-
   const fetchProducts = useCallback(async () => {
     setProductsLoading(true);
     setProductsError("");
-
     try {
       const response = await api.get("/products");
       setProducts(Array.isArray(response.data) ? response.data : []);
@@ -105,11 +103,9 @@ export default function Dashboard() {
       setProductsLoading(false);
     }
   }, []);
-
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true);
     setOrdersError("");
-
     try {
       const response = await api.get("/orders/admin/all");
       setOrders(Array.isArray(response.data) ? response.data : []);
@@ -121,10 +117,8 @@ export default function Dashboard() {
       setOrdersLoading(false);
     }
   }, []);
-
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
-
     try {
       const response = await api.get("/orders/admin/stats");
       setStats(response.data);
@@ -137,24 +131,20 @@ export default function Dashboard() {
       setStatsLoading(false);
     }
   }, []);
-
   useEffect(() => {
     fetchProducts();
     fetchStats();
   }, [fetchProducts, fetchStats]);
-
   useEffect(() => {
     if (activePage === "Orders" || activePage === "Customers") {
       fetchOrders();
     }
   }, [activePage, fetchOrders]);
-
   const openAddProduct = () => {
     setEditingProduct(null);
     setProductDetails(initialProduct);
     setShowProductModal(true);
   };
-
   const openEditProduct = (product) => {
     setEditingProduct(product);
     setProductDetails({
