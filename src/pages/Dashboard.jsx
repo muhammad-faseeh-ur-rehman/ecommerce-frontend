@@ -159,7 +159,6 @@ export default function Dashboard() {
   };
   const saveProduct = async (event) => {
     event.preventDefault();
-
     if (
       !productDetails.name.trim() ||
       !productDetails.image.trim() ||
@@ -168,7 +167,6 @@ export default function Dashboard() {
       alert("Please fill in all required fields.");
       return;
     }
-
     const payload = {
       ...productDetails,
       name: productDetails.name.trim(),
@@ -177,7 +175,6 @@ export default function Dashboard() {
       stock: Number(productDetails.stock),
       rating: Number(productDetails.rating),
     };
-
     if (
       !Number.isFinite(payload.price) ||
       payload.price < 0 ||
@@ -190,16 +187,13 @@ export default function Dashboard() {
       alert("Please enter valid price, stock and rating values.");
       return;
     }
-
     setSavingProduct(true);
-
     try {
       if (editingProduct) {
         await api.put(`/products/${editingProduct._id}`, payload);
       } else {
         await api.post("/products", payload);
       }
-
       setShowProductModal(false);
       setEditingProduct(null);
       setProductDetails(initialProduct);
@@ -212,14 +206,11 @@ export default function Dashboard() {
       setSavingProduct(false);
     }
   };
-
   const deleteProduct = async (productId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
     );
-
     if (!confirmed) return;
-
     try {
       await api.delete(`/products/${productId}`);
       await fetchProducts();
@@ -231,7 +222,6 @@ export default function Dashboard() {
   };
   const updateOrderStatus = async (orderId, status) => {
     setUpdatingOrder(orderId);
-
     try {
       await api.patch(`/orders/admin/${orderId}/status`, { status });
       await Promise.all([fetchOrders(), fetchStats()]);
@@ -243,7 +233,6 @@ export default function Dashboard() {
       setUpdatingOrder("");
     }
   };
-
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
