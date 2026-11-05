@@ -11,43 +11,34 @@ export default function Cart({
 }) {
   const navigate = useNavigate();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
-
   let user = null;
-
   try {
     user = JSON.parse(localStorage.getItem("user") || "null");
   } catch {
     user = null;
   }
-
   const token = localStorage.getItem("token");
   const isLoggedIn = Boolean(token && user);
   const isAdmin = user?.role === "admin";
-
   const total = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
-
   function handleCheckout() {
     if (!isLoggedIn) {
       setShowLoginPopup(true);
       return;
     }
-
     if (isAdmin) {
       setShowLoginPopup(false);
       return;
     }
-
     onClose();
     navigate("/store/checkout");
   }
-
   function handleLogin() {
     setShowLoginPopup(false);
     onClose();
-
     navigate("/login", {
       state: {
         message: "Please log in to continue with checkout.",
@@ -55,7 +46,6 @@ export default function Cart({
       },
     });
   }
-
   function handleSignup() {
     setShowLoginPopup(false);
     onClose();
@@ -66,9 +56,7 @@ export default function Cart({
       },
     });
   }
-
   if (!isOpen) return null;
-
   return (
     <>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/50">
@@ -80,12 +68,10 @@ export default function Cart({
                 {cart.length} product(s)
               </p>
             </div>
-
             <button onClick={onClose} aria-label="Close cart">
               <X />
             </button>
           </div>
-
           <div className="flex-1 overflow-y-auto py-4">
             {cart.length === 0 ? (
               <p className="py-10 text-center text-gray-500">
@@ -99,14 +85,11 @@ export default function Cart({
                     alt={item.name}
                     className="h-20 w-20 rounded-lg object-cover"
                   />
-
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold">{item.name}</h3>
-
                     <p className="mt-1 text-sm text-gray-500">
                       Rs. {Number(item.price).toLocaleString("en-PK")}
                     </p>
-
                     <div className="mt-3 flex items-center gap-3">
                       <button
                         onClick={() => onChangeQuantity(item.id, -1)}
@@ -114,16 +97,13 @@ export default function Cart({
                       >
                         <Minus size={16} />
                       </button>
-
                       <span>{item.quantity}</span>
-
                       <button
                         onClick={() => onChangeQuantity(item.id, 1)}
                         aria-label="Increase quantity"
                       >
                         <Plus size={16} />
                       </button>
-
                       <button
                         onClick={() => onRemove(item.id)}
                         className="ml-auto text-red-500"
@@ -137,7 +117,6 @@ export default function Cart({
               ))
             )}
           </div>
-
           <div className="border-t pt-4">
             <div className="mb-4 flex justify-between text-lg font-bold">
               <span>Total</span>
